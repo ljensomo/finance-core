@@ -16,7 +16,7 @@ class TransactionController extends Controller
      */
     public function list()
     {
-        $transactions = Transaction::with('category')->where('user_id', auth()->user()->id)->get();
+        $transactions = Transaction::with('category')->where('user_id', auth()->user()->id)->orderBy('date', 'desc')->get();
         return response()->json($transactions);
     }
 

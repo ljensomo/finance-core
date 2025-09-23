@@ -61,13 +61,11 @@ class TransactionsImport implements ToModel, WithHeadingRow, WithMapping
             case 'expense':
                 $row['type'] = 2;
                 break;
-            default:
-                $row['type'] = $row['type'];
-                break;
         }
 
         // category formatting
         $category = Category::firstorCreate([
+            'type' => $row['type'],
             'name' => $row['category'],
             'user_id' => $this->userId
         ]);

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
@@ -15,6 +16,14 @@ Auth::routes();
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 
 Route::middleware('auth:web')->group(function(){
+    // Dashboard routes
+    Route::get('/dashboard', function () {
+        return view('app');
+    })->name('dashboard.index');
+    Route::get('/api/dashboard/balance', [DashboardController::class, 'showBalance'])->name('dashboard.balance');
+    Route::get('/api/dashboard/recent-transactions', [DashboardController::class, 'showRecentTransactions'])->name('dashboard.transactions');
+
+
     // Transaction routes
     Route::get('/transactions', function () {
         return view('app');

@@ -24,6 +24,7 @@ class CategoryController extends Controller
     {
         $category = new Category();
         $category->user_id = auth()->user()->id;
+        $category->type = $request->input('type');
         $category->name = $request->input('name');
         $category->description = $request->input('description');
         $category->save();
@@ -46,6 +47,7 @@ class CategoryController extends Controller
     public function update(Request $request, string $id)
     {
         $category = Category::findOrFail($id);
+        $category->type = $request->input('type');
         $category->name = $request->input('name');
         $category->description = $request->input('description');
         $category->save();

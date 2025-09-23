@@ -10,6 +10,7 @@
                     <table class="table table-bordered table-striped">
                         <thead>
                             <tr>
+                                <th>Type</th>
                                 <th>Name</th>
                                 <th>Description</th>
                                 <th>Actions</th>
@@ -17,6 +18,7 @@
                         </thead>
                         <tbody>
                             <tr v-for="category in categories" :key="category.id">
+                                <td>{{ category.type == 1 ? 'Income' : 'Expense' }}</td>
                                 <td>{{ category.name }}</td>
                                 <td>{{ category.description }}</td>
                                 <td>
@@ -44,6 +46,14 @@
             <form @submit.prevent="submitForm">
                 <input type="hidden" name="id" v-model="form.id">
                 <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="type" class="form-label">Type</label>
+                        <select name="type" id="type" v-model="form.type" class="form-select">
+                            <option selected disabled value="">Choose...</option>
+                            <option value="1">Income</option>
+                            <option value="2">Expense</option>
+                        </select>
+                    </div>
                     <div class="mb-3">
                         <label for="name" class="form-label">Name</label>
                         <input type="text" class="form-control" id="name" name="name" placeholder="Category Name" v-model="form.name" required>
@@ -75,6 +85,7 @@
                 categories: [],
                 form: {
                     id: null,
+                    type: '',
                     name: '',
                     description: '',
                 },
