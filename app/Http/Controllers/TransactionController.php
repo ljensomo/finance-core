@@ -68,6 +68,7 @@ class TransactionController extends Controller
     public function update(Request $request, string $id)
     {
         $transaction = Transaction::findOrFail($id);
+        $transaction->date = $request->input('date');
         $transaction->type = $request->input('type');
         $transaction->amount = $request->input('amount');
         $transaction->description = $request->input('description');

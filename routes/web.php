@@ -20,9 +20,11 @@ Route::middleware('auth:web')->group(function(){
     Route::get('/dashboard', function () {
         return view('app');
     })->name('dashboard.index');
-    Route::get('/api/dashboard/balance', [DashboardController::class, 'showBalance'])->name('dashboard.balance');
-    Route::get('/api/dashboard/recent-transactions', [DashboardController::class, 'showRecentTransactions'])->name('dashboard.transactions');
-
+    Route::get('/api/dashboard/balance', [DashboardController::class, 'getBalance'])->name('dashboard.balance');
+    Route::get('/api/dashboard/recent-transactions', [DashboardController::class, 'getRecentTransactions'])->name('dashboard.transactions');
+    Route::get('/api/dashboard/monthly-income', [DashboardController::class, 'getMonthlyIncome'])->name('dashboard.monthlyIncome');
+    Route::get('/api/dashboard/monthly-expenses', [DashboardController::class, 'getMonthlyExpenses'])->name('dashboard.monthlyExpenses');
+    Route::get('/api/dashboard/spending-categories', [DashboardController::class, 'getSpendingCategories'])->name('dashboard.spendingCategories');
 
     // Transaction routes
     Route::get('/transactions', function () {
