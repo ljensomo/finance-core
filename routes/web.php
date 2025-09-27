@@ -5,6 +5,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
@@ -46,5 +47,13 @@ Route::middleware('auth:web')->group(function(){
     Route::post('/api/categories', [CategoryController::class, 'store'])->name('categories.store');
     Route::put('/api/categories/{id}', [CategoryController::class, 'update'])->name('categories.update');
     Route::delete('/api/categories/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+
+    // Reports routes
+    Route::get('/reports', function () {
+        return view('app');
+    })->middleware('auth')->name('reports.index');
+    Route::get('/api/reports/monthly-income-expenses', [ReportController::class, 'getMonthlyIncomeExpenses'])->name('reports.monthlyIncomeExpenses');
+    Route::get('/api/reports/spending-breakdown', [ReportController::class, 'getSpendingBreakdown'])->name('reports.spendingBreakdown');
+
 });
 
