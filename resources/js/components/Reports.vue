@@ -16,7 +16,46 @@
                         <div class="card">
                             <div class="card-header"><strong>Export Transactions</strong></div>
                             <div class="card-body">
-                                <a href="/api/reports/export" class="btn btn-primary">Export as CSV</a>
+                                <form @submit.prevent="downloadCSV">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="startDate">Start Date</label>
+                                                <input type="date" class="form-control" id="startDate" name="startDate" v-model="startDate" required>
+                                            </div>
+                                            <div class="form-group mt-3">
+                                                <label for="Type">Type</label>
+                                                <select class="form-control" id="type" name="type" v-model="type">
+                                                    <option value="">All Types</option>
+                                                    <option value="1">Income</option>
+                                                    <option value="2">Expense</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="endDate">End Date</label>
+                                                <input type="date" class="form-control" id="endDate" name="endDate" v-model="endDate" required>
+                                            </div>
+                                            <div class="form-group mt-3">
+                                                <label for="category">Category</label>
+                                                <select class="form-control" id="category" name="category" v-model="category">
+                                                    <option value="">All Categories</option>
+                                                    <option value="1">Salary</option>
+                                                    <option value="2">Food</option>
+                                                    <option value="3">Utilities</option>
+                                                    <option value="4">Entertainment</option>
+                                                    <option value="5">Transportation</option>
+                                                    <option value="6">Other</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <button type="submit" class="btn btn-success mt-3">Download as CSV</button>
+                                    </div>
+                                </form>
+                                
                             </div>
                         </div>
                     </div>
@@ -24,7 +63,7 @@
             </div>
             <div class="col-md-6">
                 <div class="card">
-                    <div class="card-header">Expense by Category</div>
+                    <div class="card-header"><strong>Spending Breakdown</strong></div>
 
                     <div class="card-body">
                         <canvas id="spendingChart" width="200" height="100"></canvas>
@@ -44,6 +83,14 @@
     Chart.register(Title, Tooltip, Legend, ArcElement, LineController, LineElement, CategoryScale, LinearScale, PointElement, Filler)
 
     export default {
+        data() {
+            return {
+                startDate: '',
+                endDate: '',
+                type: '',
+                category: ''
+            }
+        },
         mounted() {
             this.fetchMonthlyIncomeExpenses();
             this.fetchSpendingBreakdown();
@@ -161,6 +208,25 @@
                             }
                         }
                     }
+                });
+            },
+            downloadCSV() {
+                axios.post('/api/reports/export-transactions', {
+                    start_date: this.startDate,
+                    end_date: this.endDate,
+                    type: this.type,
+                    category: this.category
+                }, {
+                    responseType: 'blob'
+                }).then(response => {
+                    const url = window.URL.createObjectURL(new Blob([response.data]));
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.setAttribute('download', 'transactions.csv');
+                    document.body.appendChild(link);
+                    link.click();
+                }).catch(error => {
+                    console.error('Error exporting transactions:', error);
                 });
             },
         }

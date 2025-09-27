@@ -54,6 +54,7 @@ Route::middleware('auth:web')->group(function(){
     })->middleware('auth')->name('reports.index');
     Route::get('/api/reports/monthly-income-expenses', [ReportController::class, 'getMonthlyIncomeExpenses'])->name('reports.monthlyIncomeExpenses');
     Route::get('/api/reports/spending-breakdown', [ReportController::class, 'getSpendingBreakdown'])->name('reports.spendingBreakdown');
+    Route::post('/api/reports/export-transactions', [App\Exports\TransactionExport::class, 'exportCsv'])->name('reports.exportTransactions');
 
 });
 
