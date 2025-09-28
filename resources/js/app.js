@@ -5,8 +5,16 @@
  */
 
 import './bootstrap';
+
+import * as bootstrap from 'bootstrap';
+window.bootstrap = bootstrap;
+
 import { createApp } from 'vue';
 import router from './router'; // Import the router
+import VueSweetalert2 from 'vue-sweetalert2';
+// import 'datatables.net-dt';
+
+import 'sweetalert2/dist/sweetalert2.min.css';
 
 /**
  * Next, we will create a fresh Vue application instance. You may then begin
@@ -18,6 +26,10 @@ const app = createApp({});
 
 import Transactions from './components/Transactions.vue';
 import Categories from './components/Categories.vue';
+import { Helpers } from './methods/helpers.js';
+
+app.use(VueSweetalert2);
+app.mixin(Helpers);
 
 app.component('transactions', Transactions);
 app.component('categories', Categories);
