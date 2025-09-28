@@ -141,6 +141,8 @@ vite.config.ts.timestamp-*
 
 # backup files
 .git-backup
+
+.vite
 =======
 *.log
 .DS_Store
