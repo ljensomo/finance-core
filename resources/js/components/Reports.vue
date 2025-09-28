@@ -41,12 +41,7 @@
                                                 <label for="category">Category</label>
                                                 <select class="form-control" id="category" name="category" v-model="category">
                                                     <option value="">All Categories</option>
-                                                    <option value="1">Salary</option>
-                                                    <option value="2">Food</option>
-                                                    <option value="3">Utilities</option>
-                                                    <option value="4">Entertainment</option>
-                                                    <option value="5">Transportation</option>
-                                                    <option value="6">Other</option>
+                                                    <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -85,6 +80,7 @@
     export default {
         data() {
             return {
+                categories: [],
                 startDate: '',
                 endDate: '',
                 type: '',
@@ -94,6 +90,7 @@
         mounted() {
             this.fetchMonthlyIncomeExpenses();
             this.fetchSpendingBreakdown();
+            this.fetchCategories();
         },
         methods: {
             fetchMonthlyIncomeExpenses() {

@@ -23,23 +23,23 @@ class TransactionExport implements FromCollection
         $query = Transaction::where('user_id', auth()->user()->id)
             ->whereBetween('date', [$request->input('start_date'), $request->input('end_date')]);
 
-        if( $request->has('category') ) {
+        if( !empty($request->input('category')) ) {
             $query->where('category_id', $request->input('category'));
             $query->with('category');
         }
 
-        if( $request->has('type') ) {
+        if( !empty($request->input('type')) ) {
             $query->where('type', $request->input('type'));
         }
 
         $transactions = $query->get();
 
-        $csv = "Date,Amount,Type,Category,Description\n";
+        $csv = "Date,Type,Category,Amount,Description\n";
         foreach ($transactions as $transaction) {
             $type = $transaction->type == 1 ? 'Income' : 'Expense';
             $category = $transaction->category ? $transaction->category->name : '';
-            $amount = number_format($transaction->amount, 2);
-            $csv .= "{$transaction->date},{$amount},{$type},{$category},{$transaction->description}\n";
+            $amount = $transaction->amount;
+            $csv .= "{$transaction->date},{$type},{$category},{$amount},{$transaction->description}\n";
         }
 
         return Response::make($csv, 200, [
