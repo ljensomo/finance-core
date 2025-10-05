@@ -1,0 +1,7 @@
+0000000000000000000000000000000000000000 0743a244f51c6964736bb5e7a3b4199fa67b85b5 LJ Ensomo <ensomolj@gmail.com> 1758370590 +0800	branch: Created from HEAD
+0743a244f51c6964736bb5e7a3b4199fa67b85b5 f23d6a8230bb69e8f57cbf441552996ecc59ab08 LJ Ensomo <ensomolj@gmail.com> 1758623097 +0800	commit: add transaction and category module
+f23d6a8230bb69e8f57cbf441552996ecc59ab08 b98e40c63f59858fd7bad23ffc018bf6bfe68fdf LJ Ensomo <ensomolj@gmail.com> 1758631766 +0800	commit: added changes on dashboard
+b98e40c63f59858fd7bad23ffc018bf6bfe68fdf 34b5f1329d41b1779bba21ca859055c21e617ac3 LJ Ensomo <ensomolj@gmail.com> 1758933505 +0800	commit: completed initial dashboard
+34b5f1329d41b1779bba21ca859055c21e617ac3 130ee6304898182cc9012218b5b9ffd946de7bee LJ Ensomo <ensomolj@gmail.com> 1758937940 +0800	commit: added report in reports module
+130ee6304898182cc9012218b5b9ffd946de7bee 438323eaddd39b7c5b68a652d8883f433fa17293 LJ Ensomo <ensomolj@gmail.com> 1758949470 +0800	commit: added export function
+438323eaddd39b7c5b68a652d8883f433fa17293 c2a7ff86d2c4252d8e8a4198c70959739fc9c01e LJ Ensomo <ensomolj@gmail.com> 1759020409 +0800	commit: fixed export report

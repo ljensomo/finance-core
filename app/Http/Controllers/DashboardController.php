@@ -25,7 +25,7 @@ class DashboardController extends Controller
         $transactions = Transaction::with('category')
             ->where('user_id', auth()->user()->id)
             ->orderBy('date', 'desc')
-            ->limit(5)
+            ->limit(15)
             ->get();
         return response()->json($transactions);
     }

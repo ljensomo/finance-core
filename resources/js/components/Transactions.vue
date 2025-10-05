@@ -1,38 +1,59 @@
 <template>
-<div class="container">
+<div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-md-12">
             <div class="card">
-                <div class="card-header">Transactions</div>
+                <div class="card-header"><i class="fa-solid fa-file-invoice me-2"></i>Transactions</div>
 
                 <div class="card-body">
-                    <button class="btn btn-primary mb-3" @click="add('transactionModal')">Add Transaction</button>&nbsp;
-                    <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#importModal">Import Transactions</button>
-                    <table class="table table-bordered table-striped" id="transactionsTable">
-                        <thead>
-                            <tr>
-                                <th>Type</th>
-                                <th>Date</th>
-                                <th>Description</th>
-                                <th>Amount</th>
-                                <th>Category</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="transaction in transactions" :key="transaction.id">
-                                <td>{{ transaction.type == 1 ? 'Income' : 'Expense' }}</td>
-                                <td>{{ transaction.date }}</td>
-                                <td>{{ transaction.description }}</td>
-                                <td class="text-end">{{ formatPeso(transaction.amount) }}</td>
-                                <td>{{ transaction.category ? transaction.category.name : '(Uncategorized)' }}</td>
-                                <td>
-                                    <button class="btn btn-sm btn-warning" @click="fetchTransaction(transaction.id)">Edit</button>&nbsp;
-                                    <button class="btn btn-sm btn-danger" @click="deleteTransaction(transaction.id)">Delete</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <button class="btn btn-primary" @click="add('transactionModal')">Add Transaction</button>&nbsp;
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#importModal">Import Transactions</button>
+                    <hr>
+                    <div class="container-fluid table-responsive my-2">
+                        <BFormInput
+                            v-model="filter"
+                            placeholder="Type to Search..."
+                            class="mb-3"
+                            size="md"
+                            style="width:400px;"
+                        />
+                        <BTable
+                            :items="transactions"
+                            :fields="fields"
+                            :per-page="perPage"
+                            :current-page="currentPage"
+                            :filter="filter"
+                            striped
+                            hover
+                            bordered
+                        >
+                            <template #cell(type)="row">
+                                {{ row.item.type == 1 ? 'Income' : 'Expense'}}
+                            </template>
+                            <template #cell(amount)="row">
+                                {{ this.formatPeso(row.item.amount) }}
+                            </template>
+                            <template #cell(actions)="row">
+                                <BButton size="sm" variant="warning" @click="fetchTransaction(row.item.id)">Edit</BButton>&nbsp;
+                                <BButton size="sm" variant="danger" @click="deleteTransaction(row.item.id)">Delete</BButton>
+                            </template>
+                        </BTable>
+                        <div class="d-flex justify-content-between align-items-center mb-2 py-3">
+                            <p>
+                                Showing {{ startRow }}–{{ endRow }} of {{ transactions.length }} rows
+                            </p>
+                        <BPagination
+                            v-model="currentPage"
+                            :total-rows="transactions.length"
+                            :per-page="perPage"
+                            align="end"
+                            first-text="⏮"
+                            prev-text="Prev"
+                            next-text="Next"
+                            last-text="⏭"
+                        />
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -125,6 +146,8 @@
 
 <script>
     import { Helpers } from '../methods/helpers.js';
+    import { ref } from 'vue'
+
     export default {
         mixins: [Helpers],
         mounted() {
@@ -133,6 +156,18 @@
         },
         data() {
             return {
+                fields: [
+                    { key: 'type', label: 'Type', sortable: true },
+                    { key: 'date', label: 'Date', sortable: true },
+                    { key: 'description', label: 'Description', sortable: true },
+                    { key: 'amount', label: 'Amount', sortable: true, class: "text-end" },
+                    { key: 'category.name', label: 'Category', sortable: true },
+                    { key: 'actions', label: 'Actions' }
+                ],
+                perPage: ref(10),
+                currentPage: ref(1),
+                rows: ref(0),
+                filter: ref(''),
                 transactions: [],
                 categories: [],
                 form: {
@@ -147,10 +182,24 @@
                 file: null
             };
         },
+        computed: {
+            paginatedItems() {
+                const start = (this.currentPage - 1) * this.perPage.value;
+                const end = start + this.perPage.value;
+                return this.transactions.slice(start, end);
+            },
+            startRow() {
+                return this.transactions.length === 0 ? 0 : (this.currentPage - 1) * this.perPage + 1;
+            },
+            endRow() {
+                return Math.min(this.currentPage * this.perPage, this.transactions.length)
+            }
+        },
         methods: {
             fetchTransactions() {
                 axios.get('/api/transactions').then(response => {
                     this.transactions = response.data;
+                    this.rows = this.transactions.length;
                 }).catch(error => {
                     console.error('Error fetching transactions:', error);
                 });
