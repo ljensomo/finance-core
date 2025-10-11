@@ -75,11 +75,11 @@
                         <label class="form-label">Type</label>
                         <div>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="type" id="expense" value="2" v-model="form.type" requied>
+                                <input class="form-check-input" type="radio" name="type" id="expense" value="2" v-model="form.type" @change="loadCategories" requied>
                                 <label class="form-check-label" for="expense">Expense</label>
                             </div>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="type" id="income" value="1" v-model="form.type" required>
+                                <input class="form-check-input" type="radio" name="type" id="income" value="1" v-model="form.type" @change="loadCategories" required>
                                 <label class="form-check-label" for="income">Income</label>
                             </div>
                         </div>
@@ -152,7 +152,6 @@
         mixins: [Helpers],
         mounted() {
             this.fetchTransactions();
-            this.fetchCategories();
         },
         data() {
             return {
@@ -253,6 +252,7 @@
                     errorMessage: 'Failed to fetch transaction.',
                     callback: (response) => {
                         this.form = response;
+                        this.loadCategories();
                         this.isEditing = true;
                         this.openModal('transactionModal');
                     }
@@ -286,7 +286,11 @@
                     this.$swal('Error!', 'Failed to import transactions.', 'error');
                     console.error('Error importing transactions:', error);
                 });
-            }
+            },
+            loadCategories() {
+                this.categories = [];
+                this.fetchCategories(this.form.type);
+            },
         }
     }
 </script>

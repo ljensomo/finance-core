@@ -73,9 +73,13 @@ export const Helpers = {
                 console.error("error adding item", error);
             });
         },
-        fetchCategories(){
+        fetchCategories(type = null){
             try{
-                axios.get('/api/categories').then(response => {
+                axios.get('/api/categories', {
+                    params: {
+                        type: type
+                    }
+                }).then(response => {
                     this.categories = response.data;
                 }).catch(error => {
                     console.error('Error fetching categories:', error);
