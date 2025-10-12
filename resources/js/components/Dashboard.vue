@@ -56,7 +56,7 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="card mb-3">
-                            <div class="card-header text-center"><i class="fa-solid fa-arrow-down me-2"></i>Average Monthly Income</div>
+                            <div class="card-header text-center"><i class="fa-solid fa-arrow-up me-2"></i>Average Monthly Income</div>
                             <div class="card-body">
                                 <h3 class="text-center text-success">{{ this.formatPeso(monthlyIncome) }}</h3>
                             </div>
@@ -64,7 +64,7 @@
                     </div>
                     <div class="col-md-6">
                         <div class="card mb-3">
-                            <div class="card-header text-center"><i class="fa-solid fa-arrow-up me-2"></i>Average Monthly Expenses</div>
+                            <div class="card-header text-center"><i class="fa-solid fa-arrow-down me-2"></i>Average Monthly Expenses</div>
                             <div class="card-body">
                                 <h3 class="text-center text-danger">{{ this.formatPeso(monthlyExpenses) }}</h3>
                             </div>
@@ -75,7 +75,6 @@
                     <div class="col-md-12">
                         <div class="card">
                             <div class="card-header"><i class="fa-solid fa-file-invoice me-2"></i>Recent Transactions</div>
-
                             <div class="card-body">
                                 <table class="table table-bordered table-striped table-hover">
                                     <tr>
@@ -85,7 +84,14 @@
                                         <th class="text-end">Date</th>
                                     </tr>
                                     <tr v-for="transaction in recentTransactions" :key="transaction.id">
-                                        <td>{{ transaction.type == 1 ? 'Income' : 'Expense' }}</td>
+                                        <td>
+                                            <span v-if="transaction.type == 1" class="badge bg-success text-white">
+                                                <i class="fa-solid fa-arrow-up me-2"></i>Income
+                                            </span>
+                                            <span v-else class="badge bg-danger text-white">
+                                                <i class="fa-solid fa-arrow-down me-2"></i>Expense
+                                            </span>
+                                        </td>
                                         <td>{{ transaction.category ? transaction.category.name : '(Uncategorized)' }}</td>
                                         <td class="text-end">{{ this.formatPeso(transaction.amount) }}</td>
                                         <td class="text-end">{{ transaction.date }}</td>
