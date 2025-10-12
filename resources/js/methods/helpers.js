@@ -1,5 +1,14 @@
 export const Helpers = {
     methods: {
+        async fetchRecords(parameters){
+            try {
+                const response = await axios.get(parameters.url)
+                return response.data
+            } catch (error) {
+                console.error('Error fetching records:', error)
+                return [] // or null, depending on your fallback
+            }
+        },
         deleteItem(parameters){
             axios.delete(parameters.url).then(response => {
                 if(response.status == 200) {
@@ -22,17 +31,17 @@ export const Helpers = {
                 console.error("error deleting item", error);
             });
         },
-        fetchItem(parameters){
-            axios.get(parameters.url).then(response => {
-                if(response.status == 200) {
+        async fetchItem(parameters){
+            try {
+                const response = await axios.get(parameters.url)
+                if(parameters.callback != null){
                     parameters.callback(response.data);
-                }else{
-                    this.$swal('Error!', parameters.errorMessage, 'error');
                 }
-            }).catch(error => {
-                this.$swal('Error!', parameters.errorMessage, 'error');
-                console.error("error fetching item", error);
-            });
+                return response.data
+            } catch (error) {
+                this.$swal('Error!', 'Failed to fetch item.', 'error');
+                return [] // or null, depending on your fallback
+            }
         },
         updateItem(parameters){
             axios.put(parameters.url, parameters.data)
@@ -109,6 +118,47 @@ export const Helpers = {
             const modalElement = document.getElementById(modalId);
             const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
             modal.show();
-        }
+        },
+        triggerAddModal(modalId, callback = null){
+            this.isEditing = false;
+            this.openModal(modalId);
+            if(callback != null){
+                callback();
+            }
+        },
+        submitForm(e, parameters = null){
+            e.preventDefault();
+            
+            if(this.isEditing){
+                this.updateItem({
+                    url: parameters.updateUrl,
+                    data: parameters.form,
+                    successMessage: parameters.title+' updated successfully!',
+                    errorMessage: 'Failed to update '+parameters.title,
+                    callback: () => {
+                        e.target.reset();
+                        this.editing = false;
+                        if(parameters.callback != null){
+                            parameters.callback();
+                        }
+                        this.closeModal(parameters.modalId);
+                    }
+                });
+            }else{
+                this.addItem({
+                    url: parameters.addUrl,
+                    data: parameters.form,
+                    successMessage: parameters.title+' added successfully!',
+                    errorMessage: 'Failed to add '+parameters.title,
+                    callback: () => {
+                        e.target.reset();
+                        if(parameters.callback != null){
+                            parameters.callback();
+                        }
+                        this.closeModal(parameters.modalId);
+                    }
+                })
+            }
+        },
     }
 }

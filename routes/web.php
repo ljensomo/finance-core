@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\SubCategoryController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\DashboardController;
@@ -47,6 +48,15 @@ Route::middleware('auth:web')->group(function(){
     Route::post('/api/categories', [CategoryController::class, 'store'])->name('categories.store');
     Route::put('/api/categories/{id}', [CategoryController::class, 'update'])->name('categories.update');
     Route::delete('/api/categories/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+
+    // Sub-category routes
+    Route::get('/sub-categories', function () {
+        return view('app');
+    })->name('sub-categories.index');
+    Route::get('/api/sub-categories', [SubCategoryController::class, 'list'])->name('sub-categories.list');
+    Route::get('/api/sub-categories/{id}', [SubCategoryController::class, 'show'])->name('sub-categories.show');
+    Route::post('/api/sub-categories', [SubCategoryController::class, 'store'])->name('sub-categories.store');
+    Route::put('/api/sub-categories/{id}', [SubCategoryController::class, 'update'])->name('sub-categories.update');
 
     // Reports routes
     Route::get('/reports', function () {
