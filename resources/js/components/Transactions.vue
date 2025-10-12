@@ -42,16 +42,16 @@
                             <p>
                                 Showing {{ startRow }}–{{ endRow }} of {{ transactions.length }} rows
                             </p>
-                        <BPagination
-                            v-model="currentPage"
-                            :total-rows="transactions.length"
-                            :per-page="perPage"
-                            align="end"
-                            first-text="⏮"
-                            prev-text="Prev"
-                            next-text="Next"
-                            last-text="⏭"
-                        />
+                            <BPagination
+                                v-model="currentPage"
+                                :total-rows="transactions.length"
+                                :per-page="perPage"
+                                align="end"
+                                first-text="⏮"
+                                prev-text="Prev"
+                                next-text="Next"
+                                last-text="⏭"
+                            />
                         </div>
                     </div>
                 </div>

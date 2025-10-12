@@ -36,13 +36,13 @@
                         @guest
                             @if (Route::has('login'))
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
+                                    <a class="nav-link text-white" href="{{ route('login') }}">{{ __('Login') }}</a>
                                 </li>
                             @endif
 
                             @if (Route::has('register'))
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
+                                    <a class="nav-link text-white" href="{{ route('register') }}">{{ __('Register') }}</a>
                                 </li>
                             @endif
                         @else
@@ -70,45 +70,46 @@
             </div>
         </nav>
         <div class="d-flex">
-            <nav class="sidebar p-3 shadow-sm" style="width: 250px; min-height: 100vh;">
-                <ul class="nav flex-column" style="margin-top: 50px;">
-                    <li class="nav-item">
-                        <a class="nav-link" href="dashboard">
-                            <i class="fas fa-tachometer-alt me-2"></i>{{ __('Dashboard') }}
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="transactions">
-                            <i class="fa-solid fa-file-invoice me-2"></i>{{ __('Transactions') }}
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="categories">
-                            <i class="fa-solid fa-bars me-2"></i>{{ __('Categories') }}
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="wishlists">
-                            <i class="fas fa-heart me-2"></i>{{ __('Wishlists') }}
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="reports">
-                            <i class="fas fa-chart-pie me-2"></i>{{ __('Reports') }}
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="settings">
-                            <i class="fas fa-sign-out-alt me-2"></i>{{ __('Settings') }}
-                        </a>
-                    </li>
-                </ul>
-            </nav>
+            @auth
+                <nav class="sidebar p-3 shadow-sm" style="width: 250px; min-height: 100vh;">
+                    <ul class="nav flex-column" style="margin-top: 50px;">
+                        <li class="nav-item">
+                            <a class="nav-link" href="dashboard">
+                                <i class="fas fa-tachometer-alt me-2"></i>{{ __('Dashboard') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="transactions">
+                                <i class="fa-solid fa-file-invoice me-2"></i>{{ __('Transactions') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="categories">
+                                <i class="fa-solid fa-bars me-2"></i>{{ __('Categories') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="wishlists">
+                                <i class="fas fa-heart me-2"></i>{{ __('Wishlists') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="reports">
+                                <i class="fas fa-chart-pie me-2"></i>{{ __('Reports') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="settings">
+                                <i class="fas fa-sign-out-alt me-2"></i>{{ __('Settings') }}
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            @endauth
             <main class="flex-grow-1 py-4" style="margin-top: 50px;">
                 @yield('content')
             </main>
         </div>
-
     </div>
 </body>
 
