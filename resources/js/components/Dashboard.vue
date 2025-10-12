@@ -1,94 +1,115 @@
 <template>
-    <div class="container">
+    <div class="container-fluid">
+        <span class="">As of: {{ new Date() }}</span><hr>
         <div class="row justify-content-center">
             <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header"><strong>Current Balance <i>(Total Income - Total Expenses)</i></strong></div>
-
-                    <div class="card-body">
-                        <div class="row justify-content-center">
-                            <div class="col-md-6">
-                                <div class="card border-primary mb-3" style="max-width: 18rem;">
-                                    <div class="card-header bg-primary text-white">Total Income</div>
-                                    <div class="card-body">
-                                        <h5 class="card-title">{{ this.formatPeso(totals.income) }}</h5>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="card border-danger mb-3" style="max-width: 18rem;">
-                                    <div class="card-header bg-danger text-white">Total Expenses</div>
-                                    <div class="card-body">
-                                        <h5 class="card-title">{{ this.formatPeso(totals.expenses) }}</h5>
-                                    </div>
-                                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card mb-3">
+                            <div class="card-header text-center"><i class="fa-solid fa-money-bill me-2"></i>Available Balance</div>
+                            <div class="card-body">
+                                <h3 class="card-title text-center text-secondary">{{ this.formatPeso(totals.balance) }}</h3>
                             </div>
                         </div>
-                        <div class="card border-success mb-3">
-                            <div class="card-header bg-success text-white">Current Balance</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card mb-3">
+                            <div class="card-header text-center"><i class="fa-solid fa-wallet me-2"></i>Total Income</div>
                             <div class="card-body">
-                                <h4 class="card-title">{{ this.formatPeso(totals.balance) }}</h4>
+                                <h3 class="card-title text-center text-success">{{ this.formatPeso(totals.income) }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card mb-3">
+                            <div class="card-header text-center"><i class="fa-solid fa-receipt me-2"></i>Total Expenses</div>
+                            <div class="card-body">
+                                <h3 class="card-title text-center text-danger">{{ this.formatPeso(totals.expenses) }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card mb-3">
+                            <div class="card-header"><i class="fa-solid fa-chart-area me-2"></i>Income & Expenses Report</div>
+
+                            <div class="card-body">
+                                <canvas id="incomeVsExpenseChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header"><i class="fa-solid fa-chart-pie me-2"></i>Overall Category Spending</div>
+
+                            <div class="card-body">
+                                <canvas id="spendingChart"></canvas>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header"><strong>Monthly Income vs. Expenses Summary</strong></div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-header text-center"><i class="fa-solid fa-arrow-down me-2"></i>Average Monthly Income</div>
+                            <div class="card-body">
+                                <h3 class="text-center text-success">{{ this.formatPeso(monthlyIncome) }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-header text-center"><i class="fa-solid fa-arrow-up me-2"></i>Average Monthly Expenses</div>
+                            <div class="card-body">
+                                <h3 class="text-center text-danger">{{ this.formatPeso(monthlyExpenses) }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header"><i class="fa-solid fa-file-invoice me-2"></i>Recent Transactions</div>
 
-                    <div class="card-body">
-                        <p>Your monthly income is:</p>
-                        <h2>{{ this.formatPeso(monthlyIncome) }}</h2>
-                        <p>Your monthly expenses are:</p>
-                        <h2>{{ this.formatPeso(monthlyExpenses) }}</h2>
+                            <div class="card-body">
+                                <table class="table table-bordered table-striped table-hover">
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Category</th>
+                                        <th class="text-end">Amount</th>
+                                        <th class="text-end">Date</th>
+                                    </tr>
+                                    <tr v-for="transaction in recentTransactions" :key="transaction.id">
+                                        <td>{{ transaction.type == 1 ? 'Income' : 'Expense' }}</td>
+                                        <td>{{ transaction.category ? transaction.category.name : '(Uncategorized)' }}</td>
+                                        <td class="text-end">{{ this.formatPeso(transaction.amount) }}</td>
+                                        <td class="text-end">{{ transaction.date }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="row py-4 justify-content-center">
             <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header"><strong>Recent Transactions</strong></div>
-
-                    <div class="card-body">
-                        <table class="table table-bordered table-striped">
-                            <tr>
-                                <th>Type</th>
-                                <th>Category</th>
-                                <th class="text-end">Amount</th>
-                                <th class="text-end">Date</th>
-                            </tr>
-                            <tr v-for="transaction in recentTransactions" :key="transaction.id">
-                                <td>{{ transaction.type == 1 ? 'Income' : 'Expense' }}</td>
-                                <td>{{ transaction.category ? transaction.category.name : '(Uncategorized)' }}</td>
-                                <td class="text-end">{{ this.formatPeso(transaction.amount) }}</td>
-                                <td class="text-end">{{ transaction.date }}</td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header"><strong>Monthly Spending</strong></div>
-
-                    <div class="card-body">
-                        <canvas id="spendingChart"></canvas>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
 </template>
 
 <script>
-    import { ref, onMounted } from 'vue'
-    import { Chart, Title, Tooltip, Legend, ArcElement, DoughnutController} from 'chart.js'
+    import { Chart, Title, Tooltip, Legend, ArcElement, DoughnutController, LineController, LineElement, CategoryScale, LinearScale, PointElement, Filler} from 'chart.js'
     import { Doughnut } from 'vue-chartjs'
     import { Helpers } from '../methods/helpers.js';
 
-    Chart.register(Title, Tooltip, Legend, ArcElement, DoughnutController)
+    Chart.register(Title, Tooltip, Legend, ArcElement, DoughnutController, LineController, LineElement, CategoryScale, LinearScale, PointElement, Filler)
 
     export default {
         mixins: [Helpers],
@@ -97,6 +118,7 @@
             this.fetchRecentTransactions();
             this.fetchMonthlyIncome();
             this.fetchMonthlyExpenses();
+            this.fetchMonthlyIncomeExpenses();
             this.fetchSpendingCategories();
         },
         data() {
@@ -214,6 +236,70 @@
                     });
                 }).catch(error => {
                     console.log(error);
+                });
+            },
+            fetchMonthlyIncomeExpenses() {
+                axios.get('/api/reports/monthly-income-expenses')
+                    .then(response => {
+                        const data = response.data;
+                        this.renderIncomeVsExpenseChart(data);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching monthly income and expenses:', error);
+                    });
+            },
+            renderIncomeVsExpenseChart(data) {
+                const currentYear = new Date().getFullYear();
+                const ctx = document.getElementById('incomeVsExpenseChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.labels,
+                        datasets: [
+                            {
+                                label: 'Income',
+                                data: data.income,
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                fill: true,
+                            },
+                            {
+                                label: 'Expenses',
+                                data: data.expense,
+                                borderColor: 'rgba(255, 99, 132, 1)',
+                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                fill: true,
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: `Income vs Expenses (${currentYear})`
+                            },
+                            tooltip:{
+                                callbacks: {
+                                    label: context => {
+                                        const value = context.parsed.y
+                                        return this.formatPeso(value);
+                                    }
+                                }
+                            },
+                        },
+                        scales: {
+                            y: {
+                                type: 'linear',
+                                ticks: {
+                                    callback: value => this.formatPeso(value)
+                                }
+                            }
+                        }
+                    }
                 });
             },
         }

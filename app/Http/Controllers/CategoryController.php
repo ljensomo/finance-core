@@ -11,9 +11,13 @@ class CategoryController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function list()
+    public function list(Request $request)
     {
-        $categories = Category::where('user_id', auth()->user()->id)->get();
+        if($request->has('type')) {
+            $categories = Category::where('user_id', auth()->user()->id)->where('type', $request->input('type'))->get();
+        }else{
+            $categories = Category::where('user_id', auth()->user()->id)->get();
+        }
         return response()->json($categories);
     }
 

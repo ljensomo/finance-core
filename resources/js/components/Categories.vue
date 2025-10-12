@@ -1,33 +1,59 @@
 <template>
-<div class="container">
+<div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-md-12">
             <div class="card">
-                <div class="card-header">Categories</div>
-
+                <div class="card-header"><i class="fa-solid fa-bars me-2"></i>Categories</div>
                 <div class="card-body">
-                    <button class="btn btn-primary mb-3" @click="add('categoryModal')">Add Category</button>
-                    <table class="table table-bordered table-striped">
-                        <thead>
-                            <tr>
-                                <th>Type</th>
-                                <th>Name</th>
-                                <th>Description</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="category in categories" :key="category.id">
-                                <td>{{ category.type == 1 ? 'Income' : 'Expense' }}</td>
-                                <td>{{ category.name }}</td>
-                                <td>{{ category.description }}</td>
-                                <td>
-                                    <button class="btn btn-sm btn-warning" @click="fetchCategory(category.id)">Edit</button>&nbsp;
-                                    <button class="btn btn-sm btn-danger" @click="deleteCategory(category.id)">Delete</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <button class="btn btn-primary" @click="add('categoryModal')">Add Category</button>
+                    <hr>
+                    <div class="container-fluid table-responsive my-2">
+                        <BFormInput
+                            v-model="filter"
+                            placeholder="Type to Search..."
+                            class="mb-3"
+                            size="md"
+                            style="width:400px;"
+                        />
+                        <BTable
+                            :items="categories"
+                            :fields="fields"
+                            :per-page="perPage"
+                            :current-page="currentPage"
+                            :filter="filter"
+                            striped
+                            hover
+                            bordered
+                        >
+                            <template #cell(type)="row">
+                                <span v-if="row.item.type == 1" class="badge bg-success">
+                                    <i class="fa-solid fa-arrow-down me-2"></i>Income
+                                </span>
+                                <span v-else class="badge bg-danger">
+                                    <i class="fa-solid fa-arrow-up me-2"></i>Expense
+                                </span>
+                            </template>
+                            <template #cell(actions)="row">
+                                <BButton size="sm" variant="warning" @click="fetchCategory(row.item.id)">Edit</BButton>&nbsp;
+                                <BButton size="sm" variant="danger" @click="deleteCategory(row.item.id)">Delete</BButton>
+                            </template>
+                        </BTable>
+                        <div class="d-flex justify-content-between align-items-center mb-2 py-3">
+                            <p>
+                                Showing {{ startRow }}–{{ endRow }} of {{ categories.length }} rows
+                            </p>
+                            <BPagination
+                                v-model="currentPage"
+                                :total-rows="categories.length"
+                                :per-page="perPage"
+                                align="end"
+                                first-text="⏮"
+                                prev-text="Prev"
+                                next-text="Next"
+                                last-text="⏭"
+                            />
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -90,6 +116,17 @@
                     description: '',
                 },
                 isEditing: false,
+                // datatable
+                perPage: 10,
+                currentPage: 1,
+                filter: '',
+                fields: [
+                    { key: 'type', label: 'Type', sortable: true },
+                    { key: 'name', label: 'Category', sortable: true },
+                    { key: 'description', label: 'Description', sortable: true },
+                    { key: 'actions', label: 'Actions' }   
+                ],
+                isEditing: false
             };
         },
         methods:{
@@ -154,6 +191,19 @@
                     }
                 });
             }
-        }  
+        },
+        computed: {
+            paginatedItems() {
+                const start = (this.currentPage - 1) * this.perPage.value;
+                const end = start + this.perPage.value;
+                return this.categories.slice(start, end);
+            },
+            startRow() {
+                return this.categories.length === 0 ? 0 : (this.currentPage - 1) * this.perPage + 1;
+            },
+            endRow() {
+                return Math.min(this.currentPage * this.perPage, this.categories.length)
+            }
+        }
     }
 </script>
