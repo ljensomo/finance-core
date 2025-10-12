@@ -28,7 +28,12 @@
                             bordered
                         >
                             <template #cell(type)="row">
-                                {{ row.item.type == 1 ? 'Income' : 'Expense'}}
+                                <span v-if="row.item.type == 1" class="badge bg-success text-white">
+                                    <i class="fa-solid fa-arrow-up me-2"></i>Income
+                                </span>
+                                <span v-else class="badge bg-danger text-white">
+                                    <i class="fa-solid fa-arrow-down me-2"></i>Expense
+                                </span>
                             </template>
                             <template #cell(amount)="row">
                                 {{ this.formatPeso(row.item.amount) }}
