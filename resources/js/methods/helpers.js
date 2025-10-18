@@ -14,7 +14,7 @@ export const Helpers = {
                 if(response.status == 200) {
                     this.$swal({
                         title: 'Deleted!',
-                        text: parameters.successMessage,
+                        text: 'Successfully deleted record!',
                         icon: 'success',
                     }).then(() => {
                         parameters.callback();
@@ -22,7 +22,7 @@ export const Helpers = {
                 }else{
                     this.$swal({
                         title: 'Error!',
-                        text: parameters.errorMessage,
+                        text: 'Failed to delete record!',
                         icon: 'error',
                     });
                 }

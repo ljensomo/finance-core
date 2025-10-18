@@ -57,6 +57,7 @@ Route::middleware('auth:web')->group(function(){
     Route::get('/api/sub-categories/{id}', [SubCategoryController::class, 'show'])->name('sub-categories.show');
     Route::post('/api/sub-categories', [SubCategoryController::class, 'store'])->name('sub-categories.store');
     Route::put('/api/sub-categories/{id}', [SubCategoryController::class, 'update'])->name('sub-categories.update');
+    Route::delete('/api/sub-categories/{id}', [SubCategoryController::class, 'destroy'])->name('sub-categories.destroy');
 
     // Reports routes
     Route::get('/reports', function () {

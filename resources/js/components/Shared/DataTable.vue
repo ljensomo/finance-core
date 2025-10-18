@@ -15,11 +15,11 @@
             :filter="filter"
             striped
             hover
-            bordered0319
+            bordered
         >
             <template #cell(actions)="row">
                 <BButton size="sm" variant="warning" @click="onEdit(row.item.id)">Edit</BButton>&nbsp;
-                <!-- <BButton size="sm" variant="danger" @click="onDelete(row.item.id)">Delete</BButton> -->
+                <BButton size="sm" variant="danger" @click="onDelete(row.item.id)">Delete</BButton>
             </template>
         </BTable>
         <div class="d-flex justify-content-between align-items-center mb-2 py-3">
@@ -46,7 +46,7 @@ export default{
         items: Array,
         fields: Array,
         onEdit: Function,
-        // onDelete: Function
+        onDelete: Function
     },
     data() {
         return {

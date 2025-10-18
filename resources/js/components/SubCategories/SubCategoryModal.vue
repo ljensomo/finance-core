@@ -61,7 +61,7 @@ export default{
                 form: this.form,
                 callback: () => {
                     this.isEditing = false;
-                    
+                    this.$emit('reload-subcategories');
                     this.cleanForm()
                 }
             })

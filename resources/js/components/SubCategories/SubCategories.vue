@@ -7,14 +7,14 @@
                     <div class="card-body">
                         <button class="btn btn-primary" @click="triggerAddModal('subCategoryModal')">Add Sub-Category</button>
                         <hr>
-                        <DataTable :items="subcategories" :fields="fields" :onEdit="handleEdit"></DataTable>
+                        <DataTable :items="subcategories" :fields="fields" :onEdit="handleEdit" :onDelete="handleDelete"></DataTable>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <SubCategoryModal :selectedItem="selectedItem"></SubCategoryModal>
+    <SubCategoryModal @reload-subcategories="loadSubcategories" :selectedItem="selectedItem"></SubCategoryModal>
 </template>
 
 <script>
@@ -29,7 +29,7 @@ export default {
             subcategories: [],
             fields: [
                 { key: 'category.name', label: 'Category', sortable: true },
-                { key: 'name', label: 'Sub-Category', sortable: true },
+                { key: 'name', label: 'Name', sortable: true },
                 { key: 'description', label: 'Description', sortable: true },
                 { key: 'actions', label: 'Actions' }
             ]
@@ -42,11 +42,22 @@ export default {
             this.isEditing = true;
             this.openModal('subCategoryModal');
         },
+        handleDelete(itemId){
+            this.deleteItem({
+                url: `/api/sub-categories/${itemId}`,
+                callback:() => {
+                    this.loadSubcategories();
+                }
+            })
+        },
+        async loadSubcategories() {
+            this.subcategories = await this.fetchRecords({
+                url: '/api/sub-categories',
+            });
+        }
     },
     async mounted() {
-        this.subcategories = await this.fetchRecords({
-                url: '/api/sub-categories',            
-            });
+        this.loadSubcategories()
     }
 }
 </script>

@@ -53,4 +53,15 @@ class SubCategoryController extends Controller
 
         return response()->json('Sub-Category updated successfully.');
     }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        $category = SubCategory::findOrFail($id);
+        $category->delete();
+
+        return response()->json('Sub-Category deleted successfully.');
+    }
 }
