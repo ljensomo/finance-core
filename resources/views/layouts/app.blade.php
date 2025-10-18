@@ -90,6 +90,11 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link" href="sub-categories">
+                                <i class="fa-solid fa-bars me-2"></i>{{ __('Sub Categories') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="wishlists">
                                 <i class="fas fa-heart me-2"></i>{{ __('Wishlists') }}
                             </a>
