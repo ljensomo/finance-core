@@ -160,5 +160,17 @@ export const Helpers = {
                 })
             }
         },
+        capitalizeFirstLetter(text) {
+            return text.charAt(0).toUpperCase() + text.slice(1);
+        },
+        setFormVariables(formFields){
+            return formFields.filter(obj => 'key' in obj).reduce((acc, obj) => {
+                acc[obj.key] = '';
+                return acc;
+            }, {});
+        },
+        isEmptyObject(obj) {
+            return obj && typeof obj === 'object' && !Array.isArray(obj) && Object.keys(obj).length === 0
+        }
     }
 }

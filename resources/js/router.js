@@ -3,7 +3,7 @@ import Dashboard from './components/Dashboard.vue';
 import Transactions from './components/Transactions.vue';
 import Categories from './components/Categories.vue';
 import SubCategories from './components/SubCategories/SubCategories.vue';
-import Wishlists from './components/Wishlists.vue';
+import Wishlists from './components/Wishlists/Wishlists.vue';
 import Reports from './components/Reports.vue';
 import Settings from './components/Settings.vue';
 
