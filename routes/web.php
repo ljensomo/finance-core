@@ -7,6 +7,8 @@ use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\WishlistController;
+use App\Models\Wishlist;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
@@ -58,6 +60,16 @@ Route::middleware('auth:web')->group(function(){
     Route::post('/api/sub-categories', [SubCategoryController::class, 'store'])->name('sub-categories.store');
     Route::put('/api/sub-categories/{id}', [SubCategoryController::class, 'update'])->name('sub-categories.update');
     Route::delete('/api/sub-categories/{id}', [SubCategoryController::class, 'destroy'])->name('sub-categories.destroy');
+
+    // Wishlists routes
+    Route::get('/wishlists', function () {
+        return view('app');
+    })->name('wishlists.index');
+    Route::get('/api/wishlists', [WishlistController::class, 'list'])->name('wishlists.list');
+    Route::post('/api/wishlists', [WishlistController::class, 'store'])->name('wishlists.store');
+    Route::get('/api/wishlists/{id}', [WishlistController::class, 'show'])->name('wishlists.show');
+    Route::put('/api/wishlists/{id}', [WishlistController::class, 'update'])->name('wishlists.update');
+    Route::delete('/api/wishlists/{id}', [WishlistController::class, 'destroy'])->name('wishlists.destroy');
 
     // Reports routes
     Route::get('/reports', function () {
