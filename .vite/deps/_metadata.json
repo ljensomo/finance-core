@@ -1,0 +1,52 @@
+{
+  "hash": "0e6abd94",
+  "configHash": "6e9faa56",
+  "lockfileHash": "ff246e8a",
+  "browserHash": "eebcaee9",
+  "optimized": {
+    "bootstrap": {
+      "src": "../../node_modules/bootstrap/dist/js/bootstrap.esm.js",
+      "file": "bootstrap.js",
+      "fileHash": "b35e4a7d",
+      "needsInterop": false
+    },
+    "vue": {
+      "src": "../../node_modules/vue/dist/vue.runtime.esm-bundler.js",
+      "file": "vue.js",
+      "fileHash": "b8c84e44",
+      "needsInterop": false
+    },
+    "vue-sweetalert2": {
+      "src": "../../node_modules/vue-sweetalert2/dist/vue-sweetalert.mjs",
+      "file": "vue-sweetalert2.js",
+      "fileHash": "e8bd78f5",
+      "needsInterop": false
+    },
+    "bootstrap-vue-next": {
+      "src": "../../node_modules/bootstrap-vue-next/dist/bootstrap-vue-next.mjs",
+      "file": "bootstrap-vue-next.js",
+      "fileHash": "6105db49",
+      "needsInterop": false
+    },
+    "axios": {
+      "src": "../../node_modules/axios/index.js",
+      "file": "axios.js",
+      "fileHash": "a807d325",
+      "needsInterop": false
+    },
+    "vue-router": {
+      "src": "../../node_modules/vue-router/dist/vue-router.esm-bundler.js",
+      "file": "vue-router.js",
+      "fileHash": "6a8cc23f",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-Y7TKRIWE": {
+      "file": "chunk-Y7TKRIWE.js"
+    },
+    "chunk-PZ5AY32C": {
+      "file": "chunk-PZ5AY32C.js"
+    }
+  }
+}
