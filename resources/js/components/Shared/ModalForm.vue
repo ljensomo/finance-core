@@ -50,8 +50,8 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Save {{ moduleName }}</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fa-solid fa-xmark me-2"></i>Close</button>
+                        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save me-2"></i>Save {{ moduleName }}</button>
                     </div>
                 </form>
             </div>

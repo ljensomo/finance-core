@@ -5,33 +5,58 @@
                 <div class="card">
                     <div class="card-header"><i class="fa-solid fa-bars me-2"></i>Sub-Categories</div>
                     <div class="card-body">
-                        <button class="btn btn-primary" @click="triggerAddModal('subCategoryModal')">Add Sub-Category</button>
-                        <hr>
-                        <DataTable :items="subcategories" :fields="fields" :onEdit="handleEdit" :onDelete="handleDelete"></DataTable>
+                        <AddButton :module="module" @add="resetSelection"></AddButton>
+                        <DataTable 
+                            :items="subcategories"
+                            :fields="fields"
+                            :utilityUrl="utilityUrl"
+                            :module="module"
+                            @select-item="selectedItem = $event"
+                            @reload-table="loadSubcategories"
+                        >
+                        </DataTable>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <SubCategoryModal @reload-subcategories="loadSubcategories" :selectedItem="selectedItem"></SubCategoryModal>
+    <ModalForm
+        :module="module"
+        :formFields="formFields"
+        :utilityUrl="utilityUrl"
+        :selected-item="selectedItem"
+        @reload-table="loadSubcategories"
+    >
+    </ModalForm>
 </template>
 
 <script>
+import AddButton from '../Shared/AddButton.vue'
 import DataTable from '../Shared/DataTable.vue'
-import SubCategoryModal from './SubCategoryModal.vue'
+import ModalForm from '../Shared/ModalForm.vue'
 
 export default {
-    components: { SubCategoryModal, DataTable },
+    components: { DataTable, AddButton, ModalForm },
     data() {
         return {
+            module: 'sub-category',
+            utilityUrl: '/api/sub-categories',
             selectedItem: null,
             subcategories: [],
+            categories: [],
+            categoryOptions: [],
             fields: [
                 { key: 'category.name', label: 'Category', sortable: true },
                 { key: 'name', label: 'Name', sortable: true },
                 { key: 'description', label: 'Description', sortable: true },
                 { key: 'actions', label: 'Actions' }
+            ],
+            formFields: [
+                { key: 'id', label: 'ID', type: 'input', hidden: true, inputType: "text" },
+                { key: 'category_id', label: 'Category', type: 'select', required: true, options: []},
+                { key: 'name', label: 'Name', type: 'input', required: true},
+                { key: 'description', label: 'Description', type: 'textarea', required: true}
             ]
         }
     },
@@ -54,10 +79,25 @@ export default {
             this.subcategories = await this.fetchRecords({
                 url: '/api/sub-categories',
             });
+        },
+        async loadCategories() {
+            this.categories = await this.fetchRecords({
+                url: '/api/categories',
+            });
+        },
+        setCategoryOptions(){
+            this.categoryOptions = this.buildOptions(this.categories, "name", "id");
+        },
+        resetSelection() {
+            this.selectedItem = {};
         }
     },
     async mounted() {
-        this.loadSubcategories()
+        await this.loadSubcategories();
+        await this.loadCategories();
+        this.setCategoryOptions(); // format options
+        this.formFields[1].options = this.categoryOptions; // add options to category select
+        this.categories = []; // clean the category - not needed anymore
     }
 }
 </script>
