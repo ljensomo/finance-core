@@ -171,6 +171,16 @@ export const Helpers = {
         },
         isEmptyObject(obj) {
             return obj && typeof obj === 'object' && !Array.isArray(obj) && Object.keys(obj).length === 0
+        },
+        buildOptions(data, label, value){
+            let options = [];
+            for(let index in data){
+                options.push({
+                    value: data[index][value],
+                    label: data[index][label]
+                });
+            }
+            return options;
         }
     }
 }
