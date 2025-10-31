@@ -18,6 +18,9 @@
             bordered
             show-empty
         >
+            <template #cell()="data">
+                <span v-html="data.value"></span>
+            </template>
             <template #cell(actions)="row">
                 <BButton size="sm" variant="warning" @click="handleEdit(row.item.id)"><i class="fa-solid fa-edit me-2"></i>Edit</BButton>&nbsp;
                 <BButton size="sm" variant="danger" @click="handleDelete(row.item.id)"><i class="fa-solid fa-trash me-2"></i>Delete</BButton>

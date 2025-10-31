@@ -112,10 +112,10 @@
                     data: {
                         labels: data.labels,
                         datasets: [{
-                            label: 'Spending by Category',
-                            data: data.data,
-                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                            borderColor: 'rgba(75, 192, 192, 1)',
+                            label: 'Expenses by Category',
+                            data: data.values,
+                            backgroundColor: data.colors,
+                            borderColor: '#000',
                             borderWidth: 1
                         }]
                     },
@@ -138,6 +138,9 @@
                                         return this.formatPeso(value);
                                     }
                                 }
+                            },
+                            legend: {
+                                display: true
                             }
                         }
                     }

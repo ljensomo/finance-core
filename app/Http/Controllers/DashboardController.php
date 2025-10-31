@@ -64,7 +64,12 @@ class DashboardController extends Controller
 
         // Transform the result into {"Category Name": total_spent}
         $formatted = $spendingCategories->mapWithKeys(function ($item) {
-            return [$item->category->name => $item->total_spent];
+            return [
+                $item->category->name => [
+                    'value' => $item->total_spent,
+                    'color' => $item->category->color ?? '#CCCCCC'
+                ]
+            ];
         });
         return response()->json($formatted);
     }
@@ -72,20 +77,30 @@ class DashboardController extends Controller
     public function getMonthlyDashboardData(Request $request){
         $monthInput = $request->input('monthYear', date('Y-m'));
 
-        $labels = Category::where('user_id', Auth::id())->where('type', 2)->pluck('name');
-        $data = Transaction::selectRaw("category_id, SUM(amount) as total")
+        $categories = Category::where('user_id', Auth::id())->where('type', 2)->get(['name', 'color', 'id']);
+        $totals = Transaction::selectRaw("category_id, SUM(amount) as total")
                     ->where('user_id', Auth::id())
                     ->where('type', 2)
                     ->whereMonth('date', Carbon::parse($monthInput)->format('m'))
                     ->whereYear('date', Carbon::parse($monthInput)->format('Y'))
-                    ->with('category')
                     ->groupBy('category_id')
                     ->get()
-                    ->pluck('total', 'category.name');
+                    ->pluck('total', 'category_id');
+
+        $labels = [];
+        $values = [];
+        $colors = [];
+
+        foreach($categories as $category){
+            $labels[] = $category->name;
+            $values[] = $totals[$category->id] ?? 0;
+            $colors[] = $category->color ?? '#CCCCCC';
+        }
 
         return response()->json([
             'labels' => $labels,
-            'data' => $data
+            'values' => $values,
+            'colors' => $colors
         ]);
     }
 
