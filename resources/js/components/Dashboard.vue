@@ -112,7 +112,6 @@
 
 <script>
     import { Chart, Title, Tooltip, Legend, ArcElement, DoughnutController, LineController, LineElement, CategoryScale, LinearScale, PointElement, Filler} from 'chart.js'
-    import { Doughnut } from 'vue-chartjs'
     import { Helpers } from '../methods/helpers.js';
 
     Chart.register(Title, Tooltip, Legend, ArcElement, DoughnutController, LineController, LineElement, CategoryScale, LinearScale, PointElement, Filler)
