@@ -6,6 +6,7 @@ import SubCategories from './components/SubCategories/SubCategories.vue';
 import Wishlists from './components/Wishlists/Wishlists.vue';
 import Reports from './components/Reports.vue';
 import Settings from './components/Settings.vue';
+import MonthlyDashboard from './components/MonthlyDashboard.vue';
 
 const routes = [
   { path: '/dashboard', component: Dashboard },
@@ -15,6 +16,7 @@ const routes = [
   { path: '/reports', component: Reports },
   { path: '/settings', component: Settings },
   { path: '/sub-categories', component: SubCategories },
+  { path: '/monthly-dashboard', component: MonthlyDashboard },
 ];
 
 const router = createRouter({
