@@ -53,6 +53,7 @@ class CategoryController extends Controller
         $category = Category::findOrFail($id);
         $category->type = $request->input('type');
         $category->name = $request->input('name');
+        $category->color = $request->input('color');
         $category->description = $request->input('description');
         $category->save();
 
