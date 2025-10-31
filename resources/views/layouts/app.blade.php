@@ -19,6 +19,11 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="icon" href="{{ asset('finance_core_logo.png') }}" type="image/png">
+    <style>
+        .sub-item {
+            padding-left: 2rem;
+        }
+    </style>
 </head>
 
 <body>
@@ -74,10 +79,22 @@
             @auth
                 <nav class="sidebar p-3 shadow-sm" style="width: 250px; min-height: 100vh;">
                     <ul class="nav flex-column" style="margin-top: 50px;">
-                        <li class="nav-item">
-                            <a class="nav-link" href="dashboard">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle active" href="#dashboardSubmenu" role="button" data-bs-toggle="collapse" aria-expanded="false" aria-controls="dashboardSubmenu">
                                 <i class="fas fa-tachometer-alt me-2"></i>{{ __('Dashboard') }}
                             </a>
+                            <ul class="collapse list-unstyled" id="dashboardSubmenu">
+                                <li class="nav-item sub-item">
+                                    <a class="nav-link" href="dashboard">
+                                        {{ __('Overall') }}
+                                    </a>
+                                </li>
+                                <li class="nav-item sub-item">
+                                    <a class="nav-link" href="monthly-dashboard">
+                                        {{ __('Monthly') }}
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="transactions">

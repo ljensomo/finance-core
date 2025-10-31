@@ -4,11 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\Transaction;
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
+
     public function getBalance(){
         $totalIncome = Transaction::where('user_id', auth()->user()->id)->where('type', 1)->sum('amount');
         $totalExpense = Transaction::where('user_id', auth()->user()->id)->where('type', 2)->sum('amount');
@@ -63,5 +67,46 @@ class DashboardController extends Controller
             return [$item->category->name => $item->total_spent];
         });
         return response()->json($formatted);
+    }
+
+    public function getMonthlyDashboardData(Request $request){
+        $monthInput = $request->input('monthYear', date('Y-m'));
+
+        $labels = Category::where('user_id', Auth::id())->where('type', 2)->pluck('name');
+        $data = Transaction::selectRaw("category_id, SUM(amount) as total")
+                    ->where('user_id', Auth::id())
+                    ->where('type', 2)
+                    ->whereMonth('date', Carbon::parse($monthInput)->format('m'))
+                    ->whereYear('date', Carbon::parse($monthInput)->format('Y'))
+                    ->with('category')
+                    ->groupBy('category_id')
+                    ->get()
+                    ->pluck('total', 'category.name');
+
+        return response()->json([
+            'labels' => $labels,
+            'data' => $data
+        ]);
+    }
+
+    public function getMonthFinancialSummary(Request $request){
+        $monthInput = $request->input('monthYear', date('Y-m'));
+
+        $totalIncome = Transaction::where('user_id', Auth::id())
+                        ->where('type', 1)
+                        ->whereMonth('date', Carbon::parse($monthInput)->format('m'))
+                        ->whereYear('date', Carbon::parse($monthInput)->format('Y'))
+                        ->sum('amount');
+
+        $totalExpense = Transaction::where('user_id', Auth::id())
+                        ->where('type', 2)
+                        ->whereMonth('date', Carbon::parse($monthInput)->format('m'))
+                        ->whereYear('date', Carbon::parse($monthInput)->format('Y'))
+                        ->sum('amount');
+
+        return response()->json([
+            'income' => $totalIncome,
+            'expense' => $totalExpense
+        ]);
     }
 }
