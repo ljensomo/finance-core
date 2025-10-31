@@ -139,22 +139,7 @@
                 chart: null,
                 chartData:{
                     labels: [],
-                    datasets: [
-                        {
-                            label: 'Spending by Category',
-                            data: [],
-                            backgroundColor: [
-                                '#FF6384', // Soft Red
-                                '#36A2EB', // Sky Blue
-                                '#FFCE56', // Sunny Yellow
-                                '#4BC0C0', // Teal
-                                '#9966FF', // Lavender Purple
-                                '#F67019', // Orange
-                                '#00A950', // Emerald Green
-                                '#C9CBCF'  // Cool Gray
-                            ],
-                        }
-                    ]
+                    datasets: [{}]
                 },
                 chartOptions: {
                     responsive: true,
@@ -211,8 +196,12 @@
             fetchSpendingCategories(){
                 axios.get('/api/dashboard/spending-categories').then(response => {
                     const categories = response.data;
-                    this.chartData.labels = Object.keys(categories);
-                    this.chartData.datasets[0].data = Object.values(categories);
+                    const labels = Object.keys(categories);
+                    const values = labels.map(label => categories[label].value);
+                    const colors = labels.map(label => categories[label].color);
+                    this.chartData.labels = labels;
+                    this.chartData.datasets[0].data = values;
+                    this.chartData.datasets[0].backgroundColor = colors;
 
                     const pesoFormatter = this.formatPeso
                     this.chartOptions.plugins.tooltip.callbacks.label = function(context) {
@@ -221,15 +210,15 @@
 
                     this.chartOptions.plugins.legend.labels.generateLabels = function(chart) {
                         return chart.data.labels.map((label, i) => {
-                        const value = chart.data.datasets[0].data[i]
-                        return {
-                            text: `${label}: ${pesoFormatter(value)}`,
-                            fillStyle: chart.data.datasets[0].backgroundColor[i],
-                            strokeStyle: chart.data.datasets[0].backgroundColor[i],
-                            lineWidth: 1,
-                            hidden: false,
-                            index: i
-                        }
+                            const value = chart.data.datasets[0].data[i]
+                            return {
+                                text: `${label}: ${pesoFormatter(value)}`,
+                                fillStyle: chart.data.datasets[0].backgroundColor[i],
+                                strokeStyle: chart.data.datasets[0].backgroundColor[i],
+                                lineWidth: 1,
+                                hidden: false,
+                                index: i
+                            }
                         })
                     }
 
@@ -264,15 +253,15 @@
                             {
                                 label: 'Income',
                                 data: data.income,
-                                borderColor: 'rgba(75, 192, 192, 1)',
-                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                borderColor: 'rgba(25, 135, 84, 1)',
+                                backgroundColor: 'rgba(25, 135, 84, 0.2)',
                                 fill: true,
                             },
                             {
                                 label: 'Expenses',
                                 data: data.expense,
-                                borderColor: 'rgba(255, 99, 132, 1)',
-                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                borderColor: 'rgba(220, 53, 69, 1)',
+                                backgroundColor: 'rgba(220, 53, 69, 0.2)',
                                 fill: true,
                             }
                         ]
