@@ -7,7 +7,8 @@
 
                 <div class="card-body">
                     <button class="btn btn-primary" @click="add('transactionModal')">Add Transaction</button>&nbsp;
-                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#importModal">Import Transactions</button>
+                    <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#importModal">Import Transactions</button>
+                    <button class="btn btn-info">Sync Google Sheet Transactions</button>
                     <hr>
                     <div class="container-fluid table-responsive my-2">
                         <BFormInput

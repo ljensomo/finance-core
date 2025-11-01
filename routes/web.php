@@ -8,6 +8,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\WishlistController;
+use App\Http\Controllers\GoogleSheetsController;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
@@ -72,6 +73,10 @@ Route::middleware('auth:web')->group(function(){
     Route::get('/api/reports/monthly-income-expenses', [ReportController::class, 'getMonthlyIncomeExpenses'])->name('reports.monthlyIncomeExpenses');
     Route::get('/api/reports/spending-breakdown', [ReportController::class, 'getSpendingBreakdown'])->name('reports.spendingBreakdown');
     Route::post('/api/reports/export-transactions', [App\Exports\TransactionExport::class, 'exportCsv'])->name('reports.exportTransactions');
+
+    // Google Routes
+    Route::get('/google-sheet/sync', [GoogleSheetsController::class, 'syncTransactions']);
+
 
 });
 
