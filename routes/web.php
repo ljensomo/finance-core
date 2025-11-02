@@ -8,6 +8,8 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\WishlistController;
+use App\Http\Controllers\GoogleSheetsController;
+use App\Http\Controllers\ImportLogsController;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
@@ -22,27 +24,37 @@ Route::middleware('auth:web')->group(function(){
 
     $modules = [
         'transactions' => [
-            'controller' => TransactionController::class
+            'controller' => TransactionController::class,
+            'list' => true, 'show' => true,'store' => true, 'update' => true, 'destroy' => true
         ],
         'categories' => [
-            'controller' => CategoryController::class
+            'controller' => CategoryController::class,
+            'list' => true, 'show' => true,'store' => true, 'update' => true, 'destroy' => true
         ],
         'sub-categories' => [
-            'controller' => SubCategoryController::class
+            'controller' => SubCategoryController::class,
+            'list' => true, 'show' => true,'store' => true, 'update' => true, 'destroy' => true
         ],
         'wishlists' => [
-            'controller' => WishlistController::class
+            'controller' => WishlistController::class,
+            'list' => true, 'show' => true,'store' => true, 'update' => true, 'destroy' => true
+        ],
+        'import-logs' => [
+            'controller' => ImportLogsController::class,
+            'list' => true, 
         ],
     ];
+
+    // build the routes dynamically
     foreach ($modules as $module => $data){
         Route::get('/'.$module, function () {
             return view('app');
         })->name($module.'.index');
-        Route::get('/api/'.$module, [$data['controller'], 'list'])->name($module.'.list');
-        Route::get('/api/'.$module.'/{id}', [$data['controller'], 'show'])->name($module.'.show');
-        Route::post('/api/'.$module, [$data['controller'], 'store'])->name($module.'.store');
-        Route::put('/api/'.$module.'/{id}', [$data['controller'], 'update'])->name($module.'.update');
-        Route::delete('/api/'.$module.'/{id}', [$data['controller'], 'destroy'])->name($module.'.destroy');
+        if ($data['list'] ?? false) Route::get('/api/'.$module, [$data['controller'], 'list'])->name($module.'.list');
+        if ($data['show'] ?? false) Route::get('/api/'.$module.'/{id}', [$data['controller'], 'show'])->name($module.'.show');
+        if ($data['store'] ?? false) Route::post('/api/'.$module, [$data['controller'], 'store'])->name($module.'.store');
+        if ($data['update'] ?? false) Route::put('/api/'.$module.'/{id}', [$data['controller'], 'update'])->name($module.'.update');
+        if ($data['destroy'] ?? false) Route::delete('/api/'.$module.'/{id}', [$data['controller'], 'destroy'])->name($module.'.destroy');
     }
 
     // Dashboard routes
@@ -72,6 +84,10 @@ Route::middleware('auth:web')->group(function(){
     Route::get('/api/reports/monthly-income-expenses', [ReportController::class, 'getMonthlyIncomeExpenses'])->name('reports.monthlyIncomeExpenses');
     Route::get('/api/reports/spending-breakdown', [ReportController::class, 'getSpendingBreakdown'])->name('reports.spendingBreakdown');
     Route::post('/api/reports/export-transactions', [App\Exports\TransactionExport::class, 'exportCsv'])->name('reports.exportTransactions');
+
+    // Google Routes
+    Route::get('/google-sheet/sync', [GoogleSheetsController::class, 'syncTransactions']);
+
 
 });
 
