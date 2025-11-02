@@ -23,6 +23,9 @@ Route::get('/home', [HomeController::class, 'index'])->name('home');
 Route::middleware('auth:web')->group(function(){
 
     $modules = [
+        'dashboard' => [],
+        'monthly-dashboard' => [],
+        'reports' => [],
         'transactions' => [
             'controller' => TransactionController::class,
             'list' => true, 'show' => true,'store' => true, 'update' => true, 'destroy' => true
@@ -58,9 +61,6 @@ Route::middleware('auth:web')->group(function(){
     }
 
     // Dashboard routes
-    Route::get('/dashboard', function () {
-        return view('app');
-    })->name('dashboard.index');
     Route::get('/api/dashboard/balance', [DashboardController::class, 'getBalance'])->name('dashboard.balance');
     Route::get('/api/dashboard/recent-transactions', [DashboardController::class, 'getRecentTransactions'])->name('dashboard.transactions');
     Route::get('/api/dashboard/monthly-income', [DashboardController::class, 'getMonthlyIncome'])->name('dashboard.monthlyIncome');
@@ -68,9 +68,6 @@ Route::middleware('auth:web')->group(function(){
     Route::get('/api/dashboard/spending-categories', [DashboardController::class, 'getSpendingCategories'])->name('dashboard.spendingCategories');
 
     // Monthly Dashboard routes
-    Route::get('/monthly-dashboard', function () {
-        return view('app');
-    })->name('monthlyDashboard.index');
     Route::get('/api/monthly-dashboard/data', [DashboardController::class, 'getMonthlyDashboardData'])->name('monthlyDashboard.data');
     Route::get('/api/monthly-dashboard/summary', [DashboardController::class, 'getMonthFinancialSummary'])->name('monthlyDashboard.summary');
 
@@ -78,9 +75,6 @@ Route::middleware('auth:web')->group(function(){
     Route::post('/api/transactions/import', [TransactionController::class, 'import'])->name('transactions.import');
 
     // Reports routes
-    Route::get('/reports', function () {
-        return view('app');
-    })->middleware('auth')->name('reports.index');
     Route::get('/api/reports/monthly-income-expenses', [ReportController::class, 'getMonthlyIncomeExpenses'])->name('reports.monthlyIncomeExpenses');
     Route::get('/api/reports/spending-breakdown', [ReportController::class, 'getSpendingBreakdown'])->name('reports.spendingBreakdown');
     Route::post('/api/reports/export-transactions', [App\Exports\TransactionExport::class, 'exportCsv'])->name('reports.exportTransactions');
