@@ -6,9 +6,9 @@
                 <div class="card-header"><i class="fa-solid fa-file-invoice me-2"></i>Transactions</div>
 
                 <div class="card-body">
-                    <button class="btn btn-primary" @click="add('transactionModal')">Add Transaction</button>&nbsp;
-                    <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#importModal">Import Transactions</button>
-                    <button class="btn btn-info">Sync Google Sheet Transactions</button>
+                    <button class="btn btn-primary" @click="add('transactionModal')"><i class="fa-solid fa-plus me-2"></i>Add Transaction</button>&nbsp;
+                    <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#importModal"><i class="fa-solid fa-file-import me-2"></i>Import Transactions</button>
+                    <button class="btn btn-info" @click="syncTransactions"><i class="fa-solid fa-sync me-2"></i>Sync Google Sheet Transactions</button>
                     <hr>
                     <div class="container-fluid table-responsive my-2">
                         <BFormInput
@@ -148,19 +148,23 @@
         </div>
     </div>
 </div>
+    <LoadingModal :visible="isLoading"></LoadingModal>
 </template>
 
 <script>
-    import { Helpers } from '../methods/helpers.js';
+    import LoadingModal from './Shared/LoadingModal.vue';
     import { ref } from 'vue'
 
     export default {
-        mixins: [Helpers],
+        components: {
+            LoadingModal
+        },
         mounted() {
             this.fetchTransactions();
         },
         data() {
             return {
+                isLoading: false,
                 fields: [
                     { key: 'type', label: 'Type', sortable: true },
                     { key: 'date', label: 'Date', sortable: true },
@@ -297,6 +301,27 @@
                 this.categories = [];
                 this.fetchCategories(this.form.type);
             },
+            async syncTransactions() {
+                this.isLoading = true;
+                try{
+                    const response = await axios.get('/google-sheet/sync');
+                    this.$swal({
+                        title: 'Sync Completed!',
+                        html: `
+                            Rows Imported: ${response.data.rows_imported}<br/>
+                            Rows Failed: ${response.data.rows_failed}<br/>
+                            Rows Total: ${response.data.total_rows}<br/>
+                        `,
+                        icon: 'success',
+                    });
+                }catch(error){
+                    this.$swal('Error!', 'Failed to sync transactions.', 'error');
+                    console.error('Error syncing transactions:', error);
+                }finally{
+                    this.isLoading = false;
+                    this.fetchTransactions();
+                }
+            }
         }
     }
 </script>

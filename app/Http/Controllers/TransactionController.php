@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Auth;
 
 class TransactionController extends Controller
 {
@@ -16,7 +17,10 @@ class TransactionController extends Controller
      */
     public function list()
     {
-        $transactions = Transaction::with('category')->where('user_id', auth()->user()->id)->orderBy('date', 'desc')->get();
+        $transactions = Transaction::with('category')->where('user_id', Auth::id())
+                            ->orderBy('date', 'desc')
+                            ->orderBy('created_at', 'desc')->get();
+                            
         return response()->json($transactions);
     }
 
@@ -34,7 +38,7 @@ class TransactionController extends Controller
     public function store(Request $request)
     {
         $transaction = new Transaction();
-        $transaction->user_id = auth()->user()->id;
+        $transaction->user_id = Auth::id();
         $transaction->type = $request->input('type');
         $transaction->amount = $request->input('amount');
         $transaction->date = $request->input('date');
@@ -94,7 +98,7 @@ class TransactionController extends Controller
             'file' => 'required|mimes:csv,txt|max:2048'
         ]);
 
-        Excel::import(new TransactionsImport(auth()->user()->id), $request->file('file'));
+        Excel::import(new TransactionsImport(Auth::id()), $request->file('file'));
 
         return response()->json('Transactions imported successfully.');
     }

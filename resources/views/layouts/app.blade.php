@@ -126,6 +126,11 @@
                                 <i class="fas fa-sign-out-alt me-2"></i>{{ __('Settings') }}
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="import-logs">
+                                <i class="fas fa-file-alt me-2"></i>{{ __('Import Logs') }}
+                            </a>
+                        </li>
                     </ul>
                 </nav>
             @endauth

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Google\Client;
 use Google\Service\Sheets;
 use App\Models\ImportLogs;
+use App\Models\ImportedTransactionLogs;
 use App\Models\Transaction;
 use App\Models\Category;
 
@@ -67,9 +68,8 @@ class GoogleSheetsController extends Controller
         $total_rows = 0;
         $total_failed = 0;
         $imported_rows = 0;
-        $latestLog = ImportLogs::where('user_id', Auth::id())->orderBy('updated_at', 'desc')
-                ->latest()
-                ->first();
+
+        $latestLog = ImportLogs::where('user_id', Auth::id())->orderBy('updated_at', 'desc')->latest()->first();
 
         if(!$latestLog){
             $startingRow = 2;
@@ -78,14 +78,21 @@ class GoogleSheetsController extends Controller
         }
 
         $last_row = $startingRow;
-
         $transactions = $this->getTransactions($startingRow);
+        $importedTransactionLogs = [];
 
+        // Process and import transactions
         if($transactions){
             foreach($transactions as $index => $row){
                 $category = Category::where('user_id', Auth::id())->where('name', $row[3])->first();
-                
-                if(!$category){
+                $transaction_timestamp = date('Y-m-d H:i:s', strtotime($row[0]));
+                if(!$category){ // skip if category not found
+                    $importedTransactionLogs[] = [
+                        'row_number' => $last_row,
+                        'transaction_timestamp' => $transaction_timestamp,
+                        'status' => 0,
+                        'error_message' => 'Category not found: ' . $row[3],
+                    ];
                     $total_rows++;
                     $total_failed++;
                     continue;
@@ -93,7 +100,7 @@ class GoogleSheetsController extends Controller
 
                 $cleanAmount = str_replace(['₱', ','], '', $row[2]);
 
-                Transaction::create([
+                $transaction = Transaction::create([
                     'user_id' => Auth::id(),
                     'date' => date('Y-m-d', strtotime($row[1])),
                     'amount' => floatval($cleanAmount),
@@ -102,18 +109,32 @@ class GoogleSheetsController extends Controller
                     'description' => $row[4],
                 ]);
 
+                $importedTransactionLogs[] = [
+                    'row_number' => $last_row,
+                    'transaction_timestamp' => $transaction_timestamp,
+                    'status' => 1,
+                    'transaction_id' => $transaction->id,
+                    'error_message' => null,
+                ];
+
                 $total_rows++;
                 $imported_rows++;
                 $last_row++;
             }
 
-            ImportLogs::create([
+            $importLog = ImportLogs::create([
                 'user_id' => Auth::id(),
                 'total_rows' => $total_rows,
                 'rows_imported' => $imported_rows,
                 'rows_failed' => $total_failed,
                 'last_row_number' => $last_row - 1,
             ]);
+
+            // Store imported transaction logs
+            foreach($importedTransactionLogs as $log){
+                $log['import_log_id'] = $importLog->id;
+                ImportedTransactionLogs::create($log);
+            }
         }
 
         return response()->json([
