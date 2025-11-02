@@ -38,7 +38,7 @@
                 </div>
                 <div class="card mt-3">
                     <div class="card-header">
-                        Total Income for {{ monthYear }} 
+                        Total Expense for {{ monthYear }} 
                     </div>
                     <div class="card-body">
                         <h2 class="card-title text-center text-danger">
