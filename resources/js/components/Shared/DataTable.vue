@@ -22,8 +22,10 @@
                 <span v-html="data.value"></span>
             </template>
             <template #cell(actions)="row">
-                <BButton size="sm" variant="warning" @click="handleEdit(row.item.id)"><i class="fa-solid fa-edit me-2"></i>Edit</BButton>&nbsp;
-                <BButton size="sm" variant="danger" @click="handleDelete(row.item.id)"><i class="fa-solid fa-trash me-2"></i>Delete</BButton>
+                <div class="text-nowrap">
+                    <BButton size="sm" variant="warning" @click="handleEdit(row.item.id)"><i class="fa-solid fa-edit me-2"></i>Edit</BButton>&nbsp;
+                    <BButton size="sm" variant="danger" @click="handleDelete(row.item.id)"><i class="fa-solid fa-trash me-2"></i>Delete</BButton>
+                </div>
             </template>
         </b-table>
         <div class="d-flex justify-content-between align-items-center mb-2 py-3">

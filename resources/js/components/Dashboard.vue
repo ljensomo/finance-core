@@ -6,9 +6,9 @@
                 <div class="row">
                     <div class="col-md-4">
                         <div class="card mb-3">
-                            <div class="card-header text-center"><i class="fa-solid fa-money-bill me-2"></i>Available Balance</div>
+                            <div class="card-header text-center"><i class="fa-solid fa-money-bill me-2"></i>Net Income</div>
                             <div class="card-body">
-                                <h3 class="card-title text-center text-secondary">{{ this.formatPeso(totals.balance) }}</h3>
+                                <h3 class="card-title text-center text-secondary">{{ this.formatPeso(financeSummary.net) }}</h3>
                             </div>
                         </div>
                     </div>
@@ -16,7 +16,7 @@
                         <div class="card mb-3">
                             <div class="card-header text-center"><i class="fa-solid fa-wallet me-2"></i>Total Income</div>
                             <div class="card-body">
-                                <h3 class="card-title text-center text-success">{{ this.formatPeso(totals.income) }}</h3>
+                                <h3 class="card-title text-center text-success">{{ this.formatPeso(financeSummary.income) }}</h3>
                             </div>
                         </div>
                     </div>
@@ -24,11 +24,35 @@
                         <div class="card mb-3">
                             <div class="card-header text-center"><i class="fa-solid fa-receipt me-2"></i>Total Expenses</div>
                             <div class="card-body">
-                                <h3 class="card-title text-center text-danger">{{ this.formatPeso(totals.expenses) }}</h3>
+                                <h3 class="card-title text-center text-danger">{{ this.formatPeso(financeSummary.expenses) }}</h3>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-header text-center"><i class="fa-solid fa-arrow-up me-2"></i>Average Monthly Income</div>
+                            <div class="card-body">
+                                <h3 class="text-center text-success">{{ this.formatPeso(monthlyIncome) }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-header text-center"><i class="fa-solid fa-arrow-down me-2"></i>Average Monthly Expenses</div>
+                            <div class="card-body">
+                                <h3 class="text-center text-danger">{{ this.formatPeso(monthlyExpenses) }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-7">
                 <div class="row">
                     <div class="col-md-12">
                         <div class="card mb-3">
@@ -52,21 +76,23 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-5">
                 <div class="row">
                     <div class="col-md-6">
                         <div class="card mb-3">
-                            <div class="card-header text-center"><i class="fa-solid fa-arrow-up me-2"></i>Average Monthly Income</div>
+                            <div class="card-header"><i class="fa-solid fa-piggy-bank me-2"></i>Savings Rate</div>
                             <div class="card-body">
-                                <h3 class="text-center text-success">{{ this.formatPeso(monthlyIncome) }}</h3>
+                                <h3 class="card-title text-center text-primary">{{ this.savingsRate }}%</h3>
+                                <p class="text-center text-muted">{{ this.savingsRateDescription }}</p>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="card mb-3">
-                            <div class="card-header text-center"><i class="fa-solid fa-arrow-down me-2"></i>Average Monthly Expenses</div>
+                            <div class="card-header"><i class="fa-solid fa-balance-scale me-2"></i>Debt-To-Income Ratio</div>
                             <div class="card-body">
-                                <h3 class="text-center text-danger">{{ this.formatPeso(monthlyExpenses) }}</h3>
+                                <h3 class="card-title text-center text-primary">{{ this.debtToIncomeRatio }}%</h3>
+                                <p class="text-center text-muted">{{ this.debtToIncomeRatioDescription }}</p>
                             </div>
                         </div>
                     </div>
@@ -103,10 +129,6 @@
                 </div>
             </div>
         </div>
-        <div class="row py-4 justify-content-center">
-            <div class="col-md-6">
-            </div>
-        </div>
     </div>
 </template>
 
@@ -119,21 +141,25 @@
     export default {
         mixins: [Helpers],
         mounted() {
-            this.fetchBalance();
-            this.fetchRecentTransactions();
+            this.fetchFinanceSummary();
             this.fetchMonthlyIncome();
             this.fetchMonthlyExpenses();
+            this.fetchRecentTransactions();
             this.fetchMonthlyIncomeExpenses();
             this.fetchSpendingCategories();
         },
         data() {
             return {
                 recentTransactions: [],
-                totals: {
+                financeSummary: {
                     income: 0,
                     expenses: 0,
-                    balance: 0
+                    net: 0,
+                    savings: 0,
+                    debt_payments: 0
                 },
+                savingsRate: 0,
+                debtToIncomeRatio: 0,
                 monthlyIncome: 0,
                 monthlyExpenses: 0,
                 chart: null,
@@ -165,9 +191,11 @@
             }
         },
         methods:{
-            fetchBalance(){
-                axios.get('/api/dashboard/balance').then(response => {
-                    this.totals = response.data;
+            fetchFinanceSummary(){
+                axios.get('/api/dashboard/finance-overview').then(response => {
+                    this.financeSummary = response.data;
+                    this.computeSavingsRate();
+                    this.computeDebtToIncomeRatio();
                 }).catch(error => {
                     console.log(error);
                 });
@@ -296,6 +324,40 @@
                     }
                 });
             },
+            computeSavingsRate(){
+                this.savingsRate = ((this.financeSummary.savings / this.financeSummary.income) * 100).toFixed(1);
+            },
+            computeDebtToIncomeRatio(){
+                this.debtToIncomeRatio = ((this.financeSummary.debt_payments / this.financeSummary.income) * 100).toFixed(1);
+            }
+        },
+        computed: {
+            savingsRateDescription() {
+                const rate = this.savingsRate;
+                if (rate >= 20) {
+                    return 'Excellent savings rate!';
+                } else if (rate >= 10) {
+                    return 'Good savings rate.';
+                } else if (rate >= 5) {
+                    return 'Average savings rate.';
+                } else {
+                    return 'Consider improving your savings.';
+                }
+            },
+            debtToIncomeRatioDescription() {
+                const ratio = this.debtToIncomeRatio;
+                if (ratio < 21) {
+                    return 'Excellent - low debt burden';
+                } else if (ratio < 36) {
+                    return 'Acceptable - manageable debt';
+                } else if (ratio < 50) {
+                    return 'Caution - may limit borrowing ability';
+                }else if (ratio >= 50) {
+                    return 'Risky - high debt load';
+                } else {
+                    return '';
+                }
+            }
         }
     }
 </script>
