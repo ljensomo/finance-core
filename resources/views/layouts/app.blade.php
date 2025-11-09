@@ -23,6 +23,17 @@
         .sub-item {
             padding-left: 2rem;
         }
+        .sidebar{
+            width: 250px;
+            min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+        .sidebar .nav{
+            margin-top: 60px;
+        }
     </style>
 </head>
 
@@ -77,8 +88,8 @@
         </nav>
         <div class="d-flex">
             @auth
-                <nav class="sidebar p-3 shadow-sm" style="width: 250px; min-height: 100vh;">
-                    <ul class="nav flex-column" style="margin-top: 50px;">
+                <nav class="sidebar p-3 shadow-sm">
+                    <ul class="nav flex-column">
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle active" href="#dashboardSubmenu" role="button" data-bs-toggle="collapse" aria-expanded="false" aria-controls="dashboardSubmenu">
                                 <i class="fas fa-tachometer-alt me-2"></i>{{ __('Dashboard') }}
@@ -134,7 +145,7 @@
                     </ul>
                 </nav>
             @endauth
-            <main class="flex-grow-1 py-4" style="margin-top: 50px;">
+            <main class="flex-grow-1 py-4" style="margin-top: 50px; padding-left: 250px;">
                 @yield('content')
             </main>
         </div>

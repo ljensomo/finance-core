@@ -16,7 +16,7 @@
             </div>
         </form>
         <div class="row">
-            <div class="col-sm-8">
+            <div class="col-sm-7">
                 <div class="card mt-3">
                     <div class="card-header">Monthly Dashboard</div>
                     <div class="card-body" style="height: 600px;">
@@ -24,7 +24,37 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-4">
+            <div class="col-sm-5">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="card mt-3">
+                            <div class="card-header">
+                            Savings Rate for {{ monthYear }} 
+                            </div>
+                            <div class="card-body">
+                                <h2 class="card-title text-center text-primary">
+                                    <i class="fa-solid fa-piggy-bank me-2"></i>
+                                    {{ this.savingsRate }}%
+                                </h2>
+                                <p class="text-muted text-center">{{ this.savingsRateDescription }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="card mt-3">
+                            <div class="card-header">
+                            Debt-To-Income Ratio for {{ monthYear }} 
+                            </div>
+                            <div class="card-body">
+                                <h2 class="card-title text-center text-primary">
+                                    <i class="fa-solid fa-balance-scale me-2"></i>
+                                    {{ this.debtToIncomeRatio }}%
+                                </h2>
+                                <p class="text-muted text-center">{{ this.debtToIncomeRatioDescription }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="card mt-3">
                     <div class="card-header">
                         Total Income for {{ monthYear }} 
@@ -63,6 +93,10 @@
                 monthYear: '',
                 monthIncome: 0,
                 monthExpense: 0,
+                monthSavings: 0,
+                monthDebtPayments: 0,
+                savingsRate: 0,
+                debtToIncomeRatio: 0,
                 chart: null,
             }
         },
@@ -89,12 +123,15 @@
                     params: {
                         monthYear: monthYear
                     }
-                })
-                    .then(response => {
-                        const data = response.data;
-                        this.monthIncome = data.income;
-                        this.monthExpense = data.expense;
-                    });
+                }).then(response => {
+                    const data = response.data;
+                    this.monthIncome = data.income;
+                    this.monthExpense = data.expense;
+                    this.monthSavings = data.savings;
+                    this.monthDebtPayments = data.debt_payments;
+                    this.computeSavingsRate();
+                    this.computeDebtToIncomeRatio();
+                });
             },
             reloadDashboard(){
                 this.fetchChartData(this.monthYear);
@@ -146,12 +183,54 @@
                     }
                 });
                 
-            }
+            },
+            computeSavingsRate(){
+                if(this.monthIncome === 0) {
+                    this.savingsRate = 0;
+                } else {
+                    this.savingsRate = ((this.monthSavings / this.monthIncome) * 100).toFixed(1);
+                }
+            },
+            computeDebtToIncomeRatio(){
+                if(this.monthIncome === 0) {
+                    this.debtToIncomeRatio = 0;
+                } else {
+                    this.debtToIncomeRatio = ((this.monthDebtPayments / this.monthIncome) * 100).toFixed(1);
+                }
+            },
         },
         mounted(){
             this.monthYear = this.getCurrentMonthYear();
             this.fetchMonthSummary(this.monthYear);
             this.fetchChartData(this.monthYear);
+        },
+        computed: {
+            savingsRateDescription(){
+                const rate = this.savingsRate;
+                if (rate >= 20) {
+                    return 'Excellent savings rate!';
+                } else if (rate >= 10) {
+                    return 'Good savings rate.';
+                } else if (rate >= 5) {
+                    return 'Average savings rate.';
+                } else {
+                    return 'Consider improving your savings.';
+                }
+            },
+            debtToIncomeRatioDescription(){
+                const ratio = this.debtToIncomeRatio;
+                if (ratio < 21) {
+                    return 'Excellent - low debt burden';
+                } else if (ratio < 36) {
+                    return 'Acceptable - manageable debt';
+                } else if (ratio < 50) {
+                    return 'Caution - may limit borrowing ability';
+                }else if (ratio >= 50) {
+                    return 'Risky - high debt load';
+                } else {
+                    return '';
+                }
+            }
         }
     }
 </script>
