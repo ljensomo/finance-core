@@ -113,6 +113,11 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link" href="budgets">
+                                <i class="fas fa-calculator me-2"></i>{{ __('Budgets') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="categories">
                                 <i class="fa-solid fa-bars me-2"></i>{{ __('Categories') }}
                             </a>

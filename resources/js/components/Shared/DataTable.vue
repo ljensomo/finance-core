@@ -23,6 +23,7 @@
             </template>
             <template #cell(actions)="row">
                 <div class="text-nowrap">
+                    <BButton v-if="hasView" size="sm" variant="info" @click="handleView(row.item.id)" class="me-1"><i class="fa-solid fa-eye me-2"></i>View</BButton>
                     <BButton size="sm" variant="warning" @click="handleEdit(row.item.id)"><i class="fa-solid fa-edit me-2"></i>Edit</BButton>&nbsp;
                     <BButton size="sm" variant="danger" @click="handleDelete(row.item.id)"><i class="fa-solid fa-trash me-2"></i>Delete</BButton>
                 </div>
@@ -53,7 +54,9 @@ export default{
         fields: Array,
         utilityUrl: String,
         module: String,
-        formatters: Object
+        formatters: Object,
+        hasView: false,
+        viewUrl: String,
     },
     data() {
         return {
@@ -76,6 +79,11 @@ export default{
                     this.$emit('reload-table');
                 }
             })
+        },
+        handleView(itemId){
+            if(this.viewUrl){
+                this.$router.push({ path: this.viewUrl, query: { id: itemId } });
+            }
         }
     },
     mounted() {

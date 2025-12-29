@@ -10,6 +10,8 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\GoogleSheetsController;
 use App\Http\Controllers\ImportLogsController;
+use App\Http\Controllers\BudgetController;
+use App\Http\Controllers\BudgetItemController;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Importer;
 
@@ -47,6 +49,14 @@ Route::middleware('auth:web')->group(function(){
             'controller' => ImportLogsController::class,
             'list' => true, 
         ],
+        'budgets' => [
+            'controller' => BudgetController::class,
+            'list' => true, 'show' => true,'store' => true, 'update' => true, 'destroy' => true
+        ],
+        'budget-items' => [
+            'controller' => \App\Http\Controllers\BudgetItemController::class,
+            'show' => true,'store' => true, 'update' => true, 'destroy' => true
+        ],
     ];
 
     // build the routes dynamically
@@ -80,9 +90,10 @@ Route::middleware('auth:web')->group(function(){
     Route::get('/api/reports/spending-breakdown', [ReportController::class, 'getSpendingBreakdown'])->name('reports.spendingBreakdown');
     Route::post('/api/reports/export-transactions', [App\Exports\TransactionExport::class, 'exportCsv'])->name('reports.exportTransactions');
 
-    // Google Routes
+    // Google Sheet Routes
     Route::get('/google-sheet/sync', [GoogleSheetsController::class, 'syncTransactions']);
 
-
+    // Budget Items routes
+    Route::get('/budget-items/{id}', [BudgetItemController::class, 'list'])->name('budgetItems.list');
 });
 

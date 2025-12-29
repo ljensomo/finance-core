@@ -8,6 +8,8 @@ import Reports from './components/Reports.vue';
 import Settings from './components/Settings.vue';
 import MonthlyDashboard from './components/MonthlyDashboard.vue';
 import ImportLogs from './components/ImportLogs.vue';
+import Budgets from './components/Budgets.vue';
+import BudgetItems from './components/BudgetItems.vue';
 
 const routes = [
   { path: '/dashboard', component: Dashboard },
@@ -19,6 +21,8 @@ const routes = [
   { path: '/sub-categories', component: SubCategories },
   { path: '/monthly-dashboard', component: MonthlyDashboard },
   { path: '/import-logs', component: ImportLogs },
+  { path: '/budgets', component: Budgets },
+  { path: '/budget-items', component: BudgetItems },
 ];
 
 const router = createRouter({
