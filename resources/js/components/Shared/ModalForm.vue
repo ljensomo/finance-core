@@ -21,6 +21,7 @@
                                     :placeholder="field.placeholder ? field.placeholder : 'Enter ' + field.label"
                                     :hidden="field.hidden === true"
                                     :required="field.required === true"
+                                    :step="field.inputType === 'number' ? '0.01' : null"
                                     v-model="form[field.key]" 
                                 />
                                 <select 
@@ -75,11 +76,17 @@ export default{
             moduleName: '',
             modalId: '',
             modalLabel: '',
-            form: []
+            form: {}
         }
     },
     methods: {
         handleSubmit(e){
+            this.formFields.forEach(field => {
+                if(field.value !== undefined){
+                    this.form[field.key] = field.value;
+                }
+            });
+            console.log('Submitting form:', this.form);
             this.submitForm(e, {
                 updateUrl: this.utilityUrl + `/${this.form.id}`,
                 addUrl: this.utilityUrl,
