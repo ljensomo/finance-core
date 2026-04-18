@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Transaction;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\Budget;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -181,5 +182,69 @@ class DashboardController extends Controller
         return response()->json([
             'savings' => $totalSavings
         ]);
+    }
+
+    public function getBudgetStatus(Request $request){
+        $monthInput = $request->input('monthYear', date('Y-m'));
+        $month_start = Carbon::parse($monthInput)->format('Y-m-1');
+        $month_end = Carbon::parse($monthInput)->format('Y-m-t');
+
+        $budgetStatus = Budget::where('user_id', Auth::id())
+                        ->where('start_date', '<=', $month_start)
+                        ->where('end_date', '>=', $month_end)
+                        ->withSum('budgetItems as budget', 'amount')
+                        ->get();
+
+        $transaction = (float) Transaction::where('user_id', Auth::id())
+                        ->where('type', 2)
+                        ->whereMonth('date', Carbon::parse($monthInput)->format('m'))
+                        ->whereYear('date', Carbon::parse($monthInput)->format('Y'))
+                        ->sum('amount');
+
+        $remaining = $budgetStatus->sum('budget') - $transaction;
+        
+        // Calculate percentage (Guard against division by zero)
+        $usedPercent = $budgetStatus->sum('budget') > 0 
+            ? round(($transaction / $budgetStatus->sum('budget')) * 100) 
+            : 0;
+
+        return response()->json([
+            'total_limit' => $budgetStatus->sum('budget'),
+            'total_spent' => $transaction,
+            'remaining_budget' => $remaining,
+            'used_percent' => $usedPercent
+        ]);
+    }
+
+    public function getTopSpendingCategories(Request $request){
+        $monthInput = $request->input('monthYear', date('Y-m'));
+
+        $monthlyTotal = Transaction::where('user_id', Auth::id())
+            ->where('type', 2)
+            ->whereMonth('date', Carbon::parse($monthInput)->format('m'))
+            ->whereYear('date', Carbon::parse($monthInput)->format('Y'))
+            ->sum('amount');
+
+        $topCategories = Transaction::select('category_id', DB::raw('SUM(amount) as total_spent'))
+            ->where('user_id', Auth::id())
+            ->where('type', 2)
+            ->whereMonth('date', Carbon::parse($monthInput)->format('m'))
+            ->whereYear('date', Carbon::parse($monthInput)->format('Y'))
+            ->groupBy('category_id')
+            ->with('category')
+            ->orderByDesc('total_spent')
+            ->limit(3)
+            ->get();
+
+        $formatted = $topCategories->map(function ($item) use ($monthlyTotal) {
+            return [
+                'category' => $item->category->name,
+                'total_spent' => $item->total_spent,
+                'color' => $item->category->color ?? '#CCCCCC',
+                'percentage' => $item->total_spent > 0 ? round(($item->total_spent / $monthlyTotal) * 100, 1) : 0
+            ];
+        });
+
+        return response()->json($formatted);
     }
 }

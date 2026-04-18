@@ -34,6 +34,53 @@
         .sidebar .nav{
             margin-top: 60px;
         }
+        /* Parent Link Styling */
+        .nav-link {
+        color: #adb5bd;
+        padding: 0.8rem 1rem;
+        transition: all 0.3s ease;
+        border-radius: 8px;
+        margin-bottom: 2px;
+        }
+
+        .nav-link:hover, .nav-link.active {
+        background-color: rgba(13, 110, 253, 0.1);
+        color: #0d6efd;
+        }
+
+        /* Chevron Rotation Logic */
+        .nav-link[aria-expanded="true"] .chevron-icon {
+        transform: rotate(90deg);
+        }
+
+        .chevron-icon {
+        transition: transform 0.3s ease;
+        }
+
+        /* Submenu container */
+        .submenu-list {
+        padding-left: 1.5rem; /* Moves sub-items to the right */
+        margin-left: 1rem;
+        border-left: 1px solid #dee2e6; /* The connector line */
+        }
+
+        /* Sub-item styling */
+        .sub-item {
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+        opacity: 0.8;
+        }
+
+        .sub-item:hover {
+        opacity: 1;
+        background: transparent !important; /* Keep it clean */
+        color: #0d6efd;
+        }
+
+        .tiny-icon {
+        font-size: 0.5rem;
+        vertical-align: middle;
+        }
     </style>
 </head>
 
@@ -90,22 +137,34 @@
             @auth
                 <nav class="sidebar p-3 shadow-sm">
                     <ul class="nav flex-column">
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle active" href="#dashboardSubmenu" role="button" data-bs-toggle="collapse" aria-expanded="false" aria-controls="dashboardSubmenu">
-                                <i class="fas fa-tachometer-alt me-2"></i>{{ __('Dashboard') }}
+                        <li class="nav-item">
+                        <a 
+                            class="nav-link d-flex align-items-center justify-content-between" 
+                            :class="{ 'active': isDashboardActive }"
+                            data-bs-toggle="collapse" 
+                            href="#dashboardSubmenu" 
+                            role="button" 
+                            aria-expanded="false" 
+                            aria-controls="dashboardSubmenu"
+                        >
+                            <span>
+                            <i class="fas fa-chart-line me-2"></i> {{ __('Dashboard') }}
+                            </span>
+                            <i class="fas fa-chevron-right chevron-icon small"></i>
+                        </a>
+
+                        <ul class="collapse list-unstyled submenu-list" id="dashboardSubmenu">
+                            <li class="nav-item">
+                            <a class="nav-link sub-item" href="dashboard">
+                                <i class="far fa-circle me-2 tiny-icon"></i> {{ __('Overall View') }}
                             </a>
-                            <ul class="collapse list-unstyled" id="dashboardSubmenu">
-                                <li class="nav-item sub-item">
-                                    <a class="nav-link" href="dashboard">
-                                        {{ __('Overall') }}
-                                    </a>
-                                </li>
-                                <li class="nav-item sub-item">
-                                    <a class="nav-link" href="monthly-dashboard">
-                                        {{ __('Monthly') }}
-                                    </a>
-                                </li>
-                            </ul>
+                            </li>
+                            <li class="nav-item">
+                            <a class="nav-link sub-item" href="monthly-dashboard">
+                                <i class="far fa-circle me-2 tiny-icon"></i> {{ __('Monthly Analytics') }}
+                            </a>
+                            </li>
+                        </ul>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="transactions">
