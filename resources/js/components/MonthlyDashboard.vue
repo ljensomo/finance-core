@@ -89,23 +89,29 @@
                                     <span class="small text-uppercase fw-bold opacity-75">Budget Remaining</span>
                                     <i class="fa-solid fa-wallet opacity-50"></i>
                                 </div>
-                                
-                                <h1 class="fw-bold mb-3 display-6 counter-value">
-                                    {{ formatPeso(budgetRemaining) }}
-                                </h1>
 
-                                <div class="progress bg-white bg-opacity-10 mb-2" style="height: 10px">
-                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
-                                        :style="{
-                                            width: budgetUsedPercent + '%',
-                                            transition: 'width 1.5s ease-in-out' 
-                                        }"
-                                    ></div>
+                                <div v-if="totalLimit > 0">
+                                    <h1 class="fw-bold mb-3 display-6 counter-value">
+                                        {{ formatPeso(budgetRemaining) }}
+                                    </h1>
+
+                                    <div class="progress bg-white bg-opacity-10 mb-2" style="height: 10px">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+                                            :style="{
+                                                width: budgetUsedPercent + '%',
+                                                transition: 'width 1.5s ease-in-out' 
+                                            }"
+                                        ></div>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between extra-small opacity-75 fw-bold">
+                                        <span>USED: {{ budgetUsedPercent }}%</span>
+                                        <span>LIMIT: {{ formatPeso(totalLimit) }}</span>
+                                    </div>
                                 </div>
-
-                                <div class="d-flex justify-content-between extra-small opacity-75 fw-bold">
-                                    <span>USED: {{ budgetUsedPercent }}%</span>
-                                    <span>LIMIT: {{ formatPeso(totalLimit) }}</span>
+                                <div v-else class="py-4 text-center opacity-75">
+                                    <i class="fa-solid fa-circle-info fa-2x mb-2 opacity-50"></i>
+                                    <p class="mb-0 fw-medium">No budget setup for this month</p>
                                 </div>
                             </div>
                         </div>

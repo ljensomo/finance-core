@@ -22,19 +22,23 @@
 </head>
 
 <body>
-    <div id="container">
+    <div class="container py-5">
         <div class="row justify-content-center">
-            <div class="col-md-4">
-                <div class="card border-primary mt-5">
-                    <div class="card-header bg-primary text-white text-center">
-                        <i class="fa-solid fa-lock welcome-icon me-2"></i>Welcome to Finance Core
+            <div class="col-md-6 col-lg-4">
+                <div class="card border-1 shadow-lg rounded-3 mt-5 overflow-hidden">
+                    <div class="card-header bg-primary text-white text-center py-3">
+                        <h5 class="mb-0">
+                            <i class="fa-solid fa-lock me-2"></i>Welcome to Finance Core
+                        </h5>
                     </div>
-                    <div class="card-body">
-                        <p class="text-muted mb-4">
-                            A personal web application designed for straightforward financial management. It provides a clean interface to track daily expenses, monitor income, plan for future purchases, and digitally store receipts. The goal is to offer a simple, private, and efficient way to see where your money is going.
+                    
+                    <div class="card-body p-4">
+                        <p class="text-secondary mb-4">
+                            A personal web application designed for straightforward financial management. Track expenses, monitor income, and plan for your future with a clean, private, and efficient interface.
                         </p>
+                        
                         <div class="d-grid">
-                            <a href="/dashboard" class="btn btn-secondary btn-lg btn-block">
+                            <a href="/dashboard" class="btn btn-primary btn-lg px-4">
                                 <i class="fa-solid fa-arrow-right-to-bracket me-2"></i> Get Started
                             </a>
                         </div>

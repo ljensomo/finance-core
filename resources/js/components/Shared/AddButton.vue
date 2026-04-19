@@ -1,9 +1,8 @@
 <template>
-    <button class="btn btn-primary" @click="triggerAdd">
+    <button class="btn btn-sm btn-primary" @click="triggerAdd">
         <i class="fa-solid fa-plus"></i>
         Add {{ this.capitalizeFirstLetter(this.module) }}
     </button>
-    <hr>
 </template>
 
 <script>

@@ -1,28 +1,30 @@
 <template>
-    <div class="container-fluid">
-        <div class="row justify-content-center">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header"><i class="fa-solid fa-calculator me-2"></i>Budgets</div>
-                    <div class="card-body">
-                        <AddButton :module="module" @add="resetSelection"></AddButton>
-                        <DataTable
-                            :items="budgets"
-                            :fields="fields"
-                            :utilityUrl="utilityUrl"
-                            :module="module"
-                            @select-item="selectedItem = $event"
-                            @reload-table="loadBudgets"
-                            :formatters="formatters"
-                            :hasView="true"
-                            :viewUrl="viewUrl"
-                        >
-                        </DataTable>
-                    </div>
+<div class="container-fluid">
+    <div class="card shadow-sm border-1 rounded-3">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <div class="icon-box bg-primary-subtle text-primary me-3 px-3 py-2 rounded">
+                <i class="fa-solid fa-calculator me-2"></i>
                 </div>
+                <h5 class="mb-0 fw-bold">Budgets</h5>
             </div>
         </div>
+        <div class="card-body px-4 pb-4">
+            <DataTable
+                :items="budgets"
+                :fields="fields"
+                :utilityUrl="utilityUrl"
+                :module="module"
+                :formatters="formatters"
+                @select-item="selectedItem = $event"
+                @reload-table="loadBudgets"
+                @addFunction="resetSelection"
+                :hasView="true"
+                :viewUrl="viewUrl"
+            />
+        </div>
     </div>
+</div>
 
     <ModalForm
         :module="module"
@@ -34,12 +36,12 @@
     </ModalForm>
 </template>
 <script>
-    import AddButton from './Shared/AddButton.vue';
+    // import AddButton from './Shared/AddButton.vue';
     import DataTable from './Shared/DataTable.vue';
     import ModalForm from './Shared/ModalForm.vue';
 
     export default {
-        components: { AddButton, DataTable, ModalForm },
+        components: { DataTable, ModalForm },
         data() {
             return {
                 module: 'budget',
@@ -51,9 +53,9 @@
                     { key: 'budget_name', label: 'Budget Name', sortable: true },
                     { key: 'start_date', label: 'Start Date', sortable: true },
                     { key: 'end_date', label: 'End Date', sortable: true },
-                    { key: 'budget', label: 'Budget', sortable: true },
-                    { key: 'actual', label: 'Actual', sortable: true },
-                    { key: 'remaining', label: 'Remaining', sortable: true },
+                    { key: 'budget', label: 'Budget', sortable: true, class: 'text-end' },
+                    { key: 'actual', label: 'Actual', sortable: true, class: 'text-end' },
+                    { key: 'remaining', label: 'Remaining', sortable: true, class: 'text-end' },
                     { key: 'actions', label: 'Actions' }
                 ],
                 formFields: [
@@ -62,23 +64,27 @@
                     { key: 'start_date', label: 'Start Date', type: 'input', required: true, inputType: "date" },
                     { key: 'end_date', label: 'End Date', type: 'input', required: true, inputType: "date" },
                 ],
-                formatters:{
-                    budget: (value) => {
-                        return this.formatPeso(value);
-                    },
-                    actual: (value) => {
-                        const amount = value == null ? 0 : value;
-                        return this.formatPeso(amount);
-                    },
-                    remaining: (value) => {
-                        return this.formatPeso(value);
-                    },
-                    start_date: (value) => {
-                        return new Date(value).toLocaleDateString();
-                    },
-                    end_date: (value) => {
-                        return new Date(value).toLocaleDateString();
-                    }
+                formatters: {
+                    budget: (val) => ({ 
+                        value: this.formatPeso(val), 
+                        class: 'font-monospace text-secondary' 
+                    }),
+                    actual: (val) => ({ 
+                        value: this.formatPeso(val ?? 0), 
+                        class: 'font-monospace text-dark fw-medium' 
+                    }),
+                    remaining: (val) => ({ 
+                        value: this.formatPeso(val), 
+                        class: `font-monospace fw-bold ${val < 0 ? 'text-danger' : 'text-success'}` 
+                    }),
+                    start_date: (val) => ({ 
+                        value: val ? new Date(val).toLocaleDateString() : 'N/A', 
+                        class: 'text-muted' 
+                    }),
+                    end_date: (val) => ({ 
+                        value: val ? new Date(val).toLocaleDateString() : 'N/A', 
+                        class: 'text-muted' 
+                    })
                 }
             }
         },
@@ -92,6 +98,6 @@
         },
         mounted(){
             this.loadBudgets();
-        }
+        },
     }
 </script>

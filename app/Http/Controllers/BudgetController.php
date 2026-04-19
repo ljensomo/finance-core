@@ -19,7 +19,9 @@ class BudgetController extends Controller
                 ->withSum('budgetItems as budget', 'amount')
                 ->withSum(['transactions as actual' => function($query) {
                     $query->whereBetween('date', [DB::raw('budgets.start_date'), DB::raw('budgets.end_date')]);
+                    $query->where('type', 2);
                 }], 'amount')
+                ->orderBy('start_date', 'desc')
                 ->get();
 
         return response()->json($budgets);

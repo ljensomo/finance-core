@@ -181,6 +181,23 @@ export const Helpers = {
                 });
             }
             return options;
+        },
+        getCategoryStyle(category) {
+            const name = category?.toLowerCase() || '';
+            
+            const styles = {
+            food:           { icon: 'fa-solid fa-utensils',    colorClass: 'bg-orange-subtle text-orange' },
+            transportation: { icon: 'fa-solid fa-car',         colorClass: 'bg-blue-subtle text-blue' },
+            personal:       { icon: 'fa-solid fa-user',        colorClass: 'bg-purple-subtle text-purple' },
+            debt:           { icon: 'fa-solid fa-credit-card', colorClass: 'bg-danger-subtle text-danger' },
+            insurance:      { icon: 'fa-solid fa-shield-heart',colorClass: 'bg-info-subtle text-info' },
+            utilities:      { icon: 'fa-solid fa-bolt',        colorClass: 'bg-warning-subtle text-warning' },
+            housing:        { icon: 'fa-solid fa-house',       colorClass: 'bg-indigo-subtle text-indigo' },
+            savings:        { icon: 'fa-solid fa-piggy-bank',  colorClass: 'bg-success-subtle text-success' },
+            miscellaneous:  { icon: 'fa-solid fa-box',         colorClass: 'bg-secondary-subtle text-secondary' },
+            };
+
+            return styles[name] || { icon: 'fa-solid fa-circle', colorClass: 'bg-light text-muted' };
         }
     }
 }

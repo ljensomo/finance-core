@@ -65,7 +65,7 @@
                             </template>
 
                             <template #cell(amount)="row">
-                                <span :class="row.item.type == 1 ? 'text-success' : 'text-danger'" class="fw-bold">
+                                <span :class="row.item.type == 1 ? 'text-success' : 'text-danger'" class="font-monospace">
                                 {{ formatPeso(row.item.amount) }}
                                 </span>
                             </template>
@@ -175,7 +175,7 @@
           </div>
 
           <div class="modal-footer border-0 p-4 pt-0">
-            <button type="button" class="btn btn-link text-muted text-decoration-none px-4" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-outline-secondary rounded-pill text-muted text-decoration-none px-4" data-bs-dismiss="modal">Cancel</button>
             <button type="submit" class="btn btn-primary px-5 shadow-sm rounded-pill">
               Save Transaction
             </button>
@@ -183,7 +183,7 @@
         </form>
       </div>
     </div>
-  </div>
+</div>
 
 <!-- import modal -->
 <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel"
@@ -387,23 +387,6 @@
                     this.fetchTransactions();
                 }
             },
-            getCategoryStyle(category) {
-                const name = category?.toLowerCase() || '';
-                
-                const styles = {
-                food:           { icon: 'fa-solid fa-utensils',    colorClass: 'bg-orange-subtle text-orange' },
-                transportation: { icon: 'fa-solid fa-car',         colorClass: 'bg-blue-subtle text-blue' },
-                personal:       { icon: 'fa-solid fa-user',        colorClass: 'bg-purple-subtle text-purple' },
-                debt:           { icon: 'fa-solid fa-credit-card', colorClass: 'bg-danger-subtle text-danger' },
-                insurance:      { icon: 'fa-solid fa-shield-heart',colorClass: 'bg-info-subtle text-info' },
-                utilities:      { icon: 'fa-solid fa-bolt',        colorClass: 'bg-warning-subtle text-warning' },
-                housing:        { icon: 'fa-solid fa-house',       colorClass: 'bg-indigo-subtle text-indigo' },
-                savings:        { icon: 'fa-solid fa-piggy-bank',  colorClass: 'bg-success-subtle text-success' },
-                miscellaneous:  { icon: 'fa-solid fa-box',         colorClass: 'bg-secondary-subtle text-secondary' },
-                };
-
-                return styles[name] || { icon: 'fa-solid fa-circle', colorClass: 'bg-light text-muted' };
-            }
         }
     }
 </script>
