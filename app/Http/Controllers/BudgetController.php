@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Budget;
+use App\Models\BudgetItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -74,4 +75,16 @@ class BudgetController extends Controller
 
         return response()->json('Budget deleted successfully.');
     }
+
+    public function getBudgetItemComparison($budgetId){
+        $budgetItems = BudgetItem::query()
+            ->select(['id', 'budget_id', 'item_name', 'amount'])
+            ->where('budget_id', $budgetId)
+            ->withSum(['transactions as actual' => function($query) {
+                $query->where('type', 2);
+            }], 'amount')
+            ->get();
+
+        return response()->json($budgetItems);
+    } 
 }

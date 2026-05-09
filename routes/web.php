@@ -98,5 +98,8 @@ Route::middleware('auth:web')->group(function(){
 
     // Budget Items routes
     Route::get('/budget-items/{id}', [BudgetItemController::class, 'list'])->name('budgetItems.list');
+
+    // Budget routes
+    Route::get('/budgets/comparison/{id}', [BudgetController::class, 'getBudgetItemComparison'])->name('budgets.comparison');
 });
 

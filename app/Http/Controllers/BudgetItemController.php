@@ -33,6 +33,7 @@ class BudgetItemController extends Controller
         $budgetItem->sub_category_id = $request->input('sub_category_id');
         $budgetItem->amount = $request->input('amount');
         $budgetItem->description = $request->input('description');
+        $budgetItem->tag = $request->input('tag');
 
         $budgetItem->save();
 
@@ -59,6 +60,7 @@ class BudgetItemController extends Controller
         $budgetItem->sub_category_id = $request->input('sub_category_id');
         $budgetItem->amount = $request->input('amount');
         $budgetItem->description = $request->input('description');
+        $budgetItem->tag = $request->input('tag');
         $budgetItem->save();
         
         return response()->json('Budget item updated successfully.');

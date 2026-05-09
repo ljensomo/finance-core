@@ -64,6 +64,25 @@
                                 </div>
                             </template>
 
+                            <template #cell(budget.budget_name)="row">
+                                <span :class="[
+                                    'badge rounded-pill px-3',
+                                    row.item.budget ? 'bg-primary-subtle text-primary border border-primary-subtle' : 'bg-light text-muted border'
+                                ]">
+                                    <i class="fa-solid" :class="row.item.budget ? 'fa-wallet me-1' : 'fa-circle-question me-1'"></i>
+                                    {{ row.item.budget ? row.item.budget.budget_name : 'Unallocated' }}
+                                </span>
+                            </template>
+
+                            <template #cell(budget_item.tag)="row">
+                                <span :class="[
+                                    'badge rounded-pill px-3 py-1 fw-normal',
+                                    row.item.budget_item ? 'bg-secondary-subtle text-secondary border border-secondary-subtle font-monospace fst-italic' : 'text-muted small opacity-50'
+                                ]">
+                                    {{ row.item.budget_item ? '#' + row.item.budget_item.tag : '—' }}
+                                </span>
+                            </template>
+
                             <template #cell(amount)="row">
                                 <span :class="row.item.type == 1 ? 'text-success' : 'text-danger'" class="font-monospace">
                                 {{ formatPeso(row.item.amount) }}
@@ -107,81 +126,95 @@
 <!-- transaction modals -->
 <div class="modal fade" id="transactionModal" tabindex="-1" aria-labelledby="transactionModalLabel" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content border-0 shadow">
-        
-        <div class="modal-header border-0 pb-0">
-          <h5 class="modal-title fw-bold" id="transactionModalLabel">
-            <i class="fa-solid fa-money-bill-transfer me-2 text-primary"></i>
-            {{ form.id ? 'Edit' : 'New' }} Transaction
-          </h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="transactionModalLabel">
+                    <i class="fa-solid fa-money-bill-transfer me-2 text-primary"></i>
+                    {{ form.id ? 'Edit' : 'New' }} Transaction
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form @submit.prevent="submitForm" novalidate>
+                <div class="modal-body p-4">
+                    <div class="mb-4 text-center">
+                        <div class="btn-group w-100" role="group" aria-label="Transaction Type">
+                            <input type="radio" class="btn-check" name="type" id="expense" value="2" v-model="form.type" @change="loadCategories" required>
+                            <label class="btn btn-outline-danger py-2" for="expense">
+                            <i class="fa-solid fa-arrow-circle-up me-1"></i> Expense
+                            </label>
+
+                            <input type="radio" class="btn-check" name="type" id="income" value="1" v-model="form.type" @change="loadCategories">
+                            <label class="btn btn-outline-success py-2" for="income">
+                            <i class="fa-solid fa-arrow-circle-down me-1"></i> Income
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="amount" class="form-label small text-uppercase fw-bold text-muted">Amount</label>
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text bg-white border-end-0 text-muted">₱</span>
+                            <input 
+                            type="number" 
+                            class="form-control border-start-0 ps-0 fw-bold" 
+                            :class="form.type == '1' ? 'text-success' : 'text-danger'"
+                            id="amount" 
+                            step="0.01" 
+                            placeholder="0.00" 
+                            v-model="form.amount" 
+                            required
+                            >
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label small text-uppercase fw-bold text-muted">Description</label>
+                        <input type="text" class="form-control bg-light border-0" id="description" placeholder="What was this for?" v-model="form.description" required>
+                    </div>
+                    <div class="row gx-3">
+                        <div class="col-md-6 mb-3">
+                            <label for="date" class="form-label small text-uppercase fw-bold text-muted">Date</label>
+                            <input type="date" class="form-control bg-light border-0" id="date" v-model="form.date" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="category" class="form-label small text-uppercase fw-bold text-muted">Category</label>
+                            <select class="form-select bg-light border-0" id="category" v-model="form.category_id" required>
+                            <option selected disabled value="">Choose...</option>
+                            <option v-for="category in categories" :key="category.id" :value="category.id">
+                                {{ category.name }}
+                            </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row gx-3">
+                        <div class="col-md-6 mb-3">
+                            <label for="date" class="form-label small text-uppercase fw-bold text-muted">Budget</label>
+                            <select class="form-select bg-light border-0" id="category" v-model="form.budget_id" @change="fetchTags" required>
+                                <option selected disabled value="">Choose...</option>
+                                <option v-for="budget in budgets" :key="budget.id" :value="budget.id">
+                                    {{ budget.budget_name }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="category" class="form-label small text-uppercase fw-bold text-muted">Tag</label>
+                            <select class="form-select bg-light border-0" id="category" v-model="form.budget_item_id" required>
+                                <option selected disabled value="">Choose...</option>
+                                <option v-for="tag in tags" :key="tag.id" :value="tag.id">
+                                    #{{ tag.tag }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill text-muted text-decoration-none px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary px-5 shadow-sm rounded-pill">
+                    Save Transaction
+                    </button>
+                </div>
+            </form>
         </div>
-
-        <form @submit.prevent="submitForm" novalidate>
-          <div class="modal-body p-4">
-            
-            <div class="mb-4 text-center">
-              <div class="btn-group w-100" role="group" aria-label="Transaction Type">
-                <input type="radio" class="btn-check" name="type" id="expense" value="2" v-model="form.type" @change="loadCategories" required>
-                <label class="btn btn-outline-danger py-2" for="expense">
-                  <i class="fa-solid fa-arrow-circle-up me-1"></i> Expense
-                </label>
-
-                <input type="radio" class="btn-check" name="type" id="income" value="1" v-model="form.type" @change="loadCategories">
-                <label class="btn btn-outline-success py-2" for="income">
-                  <i class="fa-solid fa-arrow-circle-down me-1"></i> Income
-                </label>
-              </div>
-            </div>
-
-            <div class="mb-4">
-              <label for="amount" class="form-label small text-uppercase fw-bold text-muted">Amount</label>
-              <div class="input-group input-group-lg">
-                <span class="input-group-text bg-white border-end-0 text-muted">₱</span>
-                <input 
-                  type="number" 
-                  class="form-control border-start-0 ps-0 fw-bold" 
-                  :class="form.type == '1' ? 'text-success' : 'text-danger'"
-                  id="amount" 
-                  step="0.01" 
-                  placeholder="0.00" 
-                  v-model="form.amount" 
-                  required
-                >
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label for="description" class="form-label small text-uppercase fw-bold text-muted">Description</label>
-              <input type="text" class="form-control bg-light border-0" id="description" placeholder="What was this for?" v-model="form.description" required>
-            </div>
-
-            <div class="row gx-3">
-              <div class="col-md-6 mb-3">
-                <label for="date" class="form-label small text-uppercase fw-bold text-muted">Date</label>
-                <input type="date" class="form-control bg-light border-0" id="date" v-model="form.date" required>
-              </div>
-
-              <div class="col-md-6 mb-3">
-                <label for="category" class="form-label small text-uppercase fw-bold text-muted">Category</label>
-                <select class="form-select bg-light border-0" id="category" v-model="form.category_id" required>
-                  <option selected disabled value="">Choose...</option>
-                  <option v-for="category in categories" :key="category.id" :value="category.id">
-                    {{ category.name }}
-                  </option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div class="modal-footer border-0 p-4 pt-0">
-            <button type="button" class="btn btn-outline-secondary rounded-pill text-muted text-decoration-none px-4" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-primary px-5 shadow-sm rounded-pill">
-              Save Transaction
-            </button>
-          </div>
-        </form>
-      </div>
     </div>
 </div>
 
@@ -226,6 +259,8 @@
         },
         mounted() {
             this.fetchTransactions();
+            this.loadCategories();
+            this.fetchBudgets();
         },
         data() {
             return {
@@ -236,6 +271,8 @@
                     { key: 'description', label: 'Description', sortable: true },
                     { key: 'amount', label: 'Amount', sortable: true, class: "text-end" },
                     { key: 'category.name', label: 'Category', sortable: true },
+                    { key: 'budget.budget_name', label: 'Budget', sortable: true },
+                    { key: 'budget_item.tag', label: 'Tag', sortable: true },
                     { key: 'actions', label: 'Actions' }
                 ],
                 perPage: ref(10),
@@ -244,6 +281,8 @@
                 filter: ref(''),
                 transactions: [],
                 categories: [],
+                budgets: [],
+                tags: [],
                 form: {
                     id: null,
                     type: null,
@@ -251,6 +290,8 @@
                     description: '',
                     amount: null,
                     category_id: null,
+                    budget_id: null,
+                    budget_item_id: null,
                 },
                 isEditing: false,
                 file: null
@@ -328,6 +369,7 @@
                     callback: (response) => {
                         this.form = response;
                         this.loadCategories();
+                        this.fetchTags();
                         this.isEditing = true;
                         this.openModal('transactionModal');
                     }
@@ -387,6 +429,21 @@
                     this.fetchTransactions();
                 }
             },
+            fetchBudgets(){
+                axios.get('/api/budgets').then(response => {
+                    this.budgets = response.data;
+                }).catch(error => {
+                    console.error('Error fetching budgets:', error);
+                });
+            },
+            fetchTags(){
+                const budget_id = this.form.budget_id;
+                axios.get(`/budget-items/${budget_id}`).then(response => {
+                    this.tags = response.data;
+                }).catch(error => {
+                    console.error('Error fetching tags:', error);
+                });
+            }
         }
     }
 </script>
