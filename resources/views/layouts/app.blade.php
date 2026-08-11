@@ -166,11 +166,7 @@
                             $links = [
                                 ['url' => 'transactions', 'icon' => 'fa-file-invoice', 'label' => 'Transactions'],
                                 ['url' => 'budgets', 'icon' => 'fa-calculator', 'label' => 'Budgets'],
-                                ['url' => 'categories', 'icon' => 'fa-bars', 'label' => 'Categories'],
-                                ['url' => 'sub-categories', 'icon' => 'fa-bars', 'label' => 'Sub Categories'],
                                 ['url' => 'wishlists', 'icon' => 'fa-heart', 'label' => 'Wishlists'],
-                                ['url' => 'reports', 'icon' => 'fa-chart-pie', 'label' => 'Reports'],
-                                ['url' => 'settings', 'icon' => 'fa-cog', 'label' => 'Settings'],
                                 ['url' => 'import-logs', 'icon' => 'fa-file-alt', 'label' => 'Import Logs'],
                             ];
                         @endphp
@@ -184,6 +180,21 @@
                             </a>
                         </li>
                         @endforeach
+
+                        <li class="nav-item">
+                            <a class="nav-link px-3 py-2 rounded-3 transition-all d-flex align-items-center justify-content-between {{ request()->is('settings*') ? 'active bg-primary text-white' : 'text-secondary' }}" 
+                            data-bs-toggle="collapse" href="#settingsSubmenu" role="button" aria-expanded="false">
+                                <span class="d-flex align-items-center">
+                                    <i class="fas fa-chart-line me-3" style="width: 20px; text-align: center;"></i>
+                                    <span class="fw-medium">{{ __('Settings') }}</span>
+                                </span>
+                                <i class="fas fa-chevron-right small transition-all"></i>
+                            </a>
+                            <ul class="collapse list-unstyled ps-4 mt-1" id="settingsSubmenu">
+                                <li><a class="nav-link py-1 text-secondary" href="settings"><i class="fa-solid fa-bars me-2 tiny-icon"></i> {{ __('Categories') }}</a></li>
+                                <li><a class="nav-link py-1 text-secondary" href="user-profile"><i class="fa-solid fa-bars me-2 tiny-icon"></i> {{ __('Sub Categories') }}</a></li>
+                            </ul>
+                        </li>
                     </ul>
                 </nav>
                 <main class="flex-grow-1 py-4" style="margin-top: 50px; padding-left: 250px;">
