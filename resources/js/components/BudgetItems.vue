@@ -17,27 +17,59 @@
             </div>
         </div>
 
-        <!-- GRAPH SECTION -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-white border-0 pt-4">
+        <!-- GRAPH & DASHBOARD SECTION -->
+        <div class="row mb-4 g-3">
+            <!-- Chart Column -->
+            <div class="col-12 col-lg-8">
+                <div class="card border-1 shadow-sm rounded-3 h-100">
+                    <div class="card-header bg-transparent border-0 pt-4 px-4">
                         <h6 class="fw-bold text-muted text-uppercase small mb-0">Budget vs. Actual Performance</h6>
                     </div>
-                    <div class="card-body">
-                        <!-- Placeholder for your Chart Component -->
+                    <div class="card-body px-4 pb-4">
                         <div style="height: 300px;">
                             <canvas id="budgetChart"></canvas> 
-                            <!-- If using a Vue-Chart wrapper: <BarChart :data="chartData" /> -->
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Stats Column -->
+            <div class="col-12 col-lg-4 d-flex flex-column gap-3">
+                
+                <!-- Total Amount Card -->
+                <div class="card border-1 shadow-sm rounded-3 flex-fill stat-card-success">
+                    <div class="card-body d-flex align-items-center justify-content-between p-4">
+                        <div>
+                            <span class="fw-bold text-uppercase small text-muted">Total Budget Amount</span>
+                            <h3 class="fw-bold text-emerald mb-1 mt-1">{{ formatPeso(totalBudget) }}</h3>
+                            <span class="badge bg-success-subtle text-success rounded-pill px-2 py-1">+12% from last month</span>
+                        </div>
+                        <div class="stat-icon bg-emerald-subtle text-emerald rounded-circle">
+                            <i class="bi bi-wallet2 fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Expense Card -->
+                <div class="card border-1 shadow-sm rounded-3 flex-fill stat-card-danger">
+                    <div class="card-body d-flex align-items-center justify-content-between p-4">
+                        <div>
+                            <span class="fw-bold text-uppercase small text-muted">Total Expenses this month</span>
+                            <h3 class="fw-bold text-rose mb-1 mt-1">{{ formatPeso(totalActual) }}</h3>
+                            <span class="badge bg-danger-subtle text-danger rounded-pill px-2 py-1">+5% from last month</span>
+                        </div>
+                        <div class="stat-icon bg-rose-subtle text-rose rounded-circle">
+                            <i class="bi bi-credit-card fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
         </div>
 
         <!-- DATA TABLE SECTION -->
-        <div class="card border-0 shadow-sm">
-            <div class="card-body p-0">
+        <div class="card shadow-sm">
+            <div class="card-body border-1 px-4 pb-4">
                 <DataTable
                     :items="budgets"
                     :fields="fields"
@@ -94,6 +126,8 @@
                 categoryOptions: [],
                 isEdit: false,
                 tags: [],
+                totalBudget: 0,
+                totalActual: 0,
                 fields: [
                     { key: 'item_name', label: 'Title', sortable: true },
                     { key: 'category.name', label: 'Category', sortable: true },
@@ -144,6 +178,11 @@
             fetchBudgetItemComparison(){
                 axios.get(`/budgets/comparison/${this.budgetId}`).then(response => {
                     this.tags = response.data;
+
+                    // Calculate Totals
+                    this.totalBudget = this.tags.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+                    this.totalActual = this.tags.reduce((sum, item) => sum + (parseFloat(item.actual) || 0), 0);
+                    
                     const chartData = {
                         labels: this.tags.map(item => item.item_name),
                         budgetValues: this.tags.map(item => item.amount),
@@ -226,7 +265,7 @@
                         }
                     }
                 });
-            }
+            },
          },
         async mounted(){
             this.budget = await this.fetchItem({ url: '/api/budgets/'+this.$route.query.id });
