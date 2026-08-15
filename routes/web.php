@@ -81,6 +81,9 @@ Route::middleware('auth:web')->group(function(){
     // Monthly Dashboard routes
     Route::get('/api/monthly-dashboard/data', [DashboardController::class, 'getMonthlyDashboardData'])->name('monthlyDashboard.data');
     Route::get('/api/monthly-dashboard/summary', [DashboardController::class, 'getMonthFinancialSummary'])->name('monthlyDashboard.summary');
+    Route::get('/api/monthly-dashboard/budget-status', [DashboardController::class, 'getBudgetStatus'])->name('monthlyDashboard.budgetStatus');
+    Route::get('/api/monthly-dashboard/top-spending-categories', [DashboardController::class, 'getTopSpendingCategories'])->name('monthlyDashboard.topSpendingCategories');
+    
 
     // Transaction routes
     Route::post('/api/transactions/import', [TransactionController::class, 'import'])->name('transactions.import');
@@ -95,5 +98,8 @@ Route::middleware('auth:web')->group(function(){
 
     // Budget Items routes
     Route::get('/budget-items/{id}', [BudgetItemController::class, 'list'])->name('budgetItems.list');
+
+    // Budget routes
+    Route::get('/budgets/comparison/{id}', [BudgetController::class, 'getBudgetItemComparison'])->name('budgets.comparison');
 });
 

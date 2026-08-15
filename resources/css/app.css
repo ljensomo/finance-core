@@ -9,3 +9,27 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+.category-icon-sm {
+  width: 28px;
+  height: 28px;
+  font-size: 0.75rem;
+}
+
+/* Custom Subtles (if not in your Bootstrap version) */
+.bg-orange-subtle { background-color: #fff3e0; }
+.text-orange { color: #ef6c00; }
+
+.bg-purple-subtle { background-color: #f3e5f5; }
+.text-purple { color: #7b1fa2; }
+
+.bg-blue-subtle { background-color: #e3f2fd; }
+.text-blue { color: #1976d2; }
+
+.bg-indigo-subtle { background-color: #e8eaf6; }
+.text-indigo { color: #3f51b5; }
+
+/* Ensure icons are centered */
+.category-icon-sm i {
+  display: block;
+}

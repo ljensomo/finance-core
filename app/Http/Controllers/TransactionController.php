@@ -17,7 +17,10 @@ class TransactionController extends Controller
      */
     public function list()
     {
-        $transactions = Transaction::with('category')->where('user_id', Auth::id())
+        $transactions = Transaction::with('category')
+                            ->with('budget')
+                            ->with('budgetItem')
+                            ->where('user_id', Auth::id())
                             ->orderBy('date', 'desc')
                             ->orderBy('created_at', 'desc')->get();
                             
@@ -44,6 +47,8 @@ class TransactionController extends Controller
         $transaction->date = $request->input('date');
         $transaction->description = $request->input('description');
         $transaction->category_id = $request->input('category_id');
+        $transaction->budget_id = $request->input('budget_id');
+        $transaction->budget_item_id = $request->input('budget_item_id');
         $transaction->save();
 
         return response()->json($transaction);
@@ -77,6 +82,8 @@ class TransactionController extends Controller
         $transaction->amount = $request->input('amount');
         $transaction->description = $request->input('description');
         $transaction->category_id = $request->input('category_id');
+        $transaction->budget_id = $request->input('budget_id');
+        $transaction->budget_item_id = $request->input('budget_item_id');
         $transaction->save();
 
         return response()->json('Transaction updated successfully.');

@@ -3,21 +3,36 @@
     <div class="row justify-content-center">
         <div class="col-md-12">
             <div class="card">
-                <div class="card-header"><i class="fa-solid fa-file-invoice me-2"></i>Transactions</div>
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-box bg-primary-subtle text-primary me-3 px-3 py-2 rounded">
+                        <i class="fa-solid fa-file-invoice"></i>
+                        </div>
+                        <h5 class="mb-0 fw-bold">Transactions</h5>
+                    </div>
+                </div>
 
                 <div class="card-body">
-                    <button class="btn btn-primary" @click="add('transactionModal')"><i class="fa-solid fa-plus me-2"></i>Add Transaction</button>&nbsp;
-                    <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#importModal"><i class="fa-solid fa-file-import me-2"></i>Import Transactions</button>
-                    <button class="btn btn-info" @click="syncTransactions"><i class="fa-solid fa-sync me-2"></i>Sync Google Sheet Transactions</button>
-                    <hr>
-                    <div class="container-fluid table-responsive my-2">
-                        <BFormInput
-                            v-model="filter"
-                            placeholder="Type to Search..."
-                            class="mb-3"
-                            size="md"
-                            style="width:400px;"
-                        />
+                    <div class="row g-3 mb-4 align-items-center">
+                        <div class="col-md-8 d-flex gap-2">
+                            <button class="btn btn-sm btn-primary shadow-sm" @click="add('transactionModal')"><i class="fa-solid fa-plus me-2"></i>Add Transaction</button>
+                            <button class="btn btn-sm btn-success" data-bs-toggle="modal" disabled data-bs-target="#importModal"><i class="fa-solid fa-file-import me-2"></i>Import Transactions</button>
+                            <button class="btn btn-sm btn-info" @click="syncTransactions"><i class="fa-solid fa-sync me-2"></i>Sync Google Sheet Transactions</button>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="fa-solid fa-magnifying-glass text-muted"></i>
+                                </span>
+                                <BFormInput
+                                    v-model="filter"
+                                    placeholder="Type to Search..."
+                                    size="sm"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
                         <BTable
                             :items="transactions"
                             :fields="fields"
@@ -26,24 +41,66 @@
                             :filter="filter"
                             striped
                             hover
-                            bordered
+                            class="align-middle border-top"
+                            thead-class="table-light text-uppercase small fw-bold"
                         >
                             <template #cell(type)="row">
-                                <span v-if="row.item.type == 1" class="badge bg-success text-white">
-                                    <i class="fa-solid fa-arrow-up me-2"></i>Income
+                                <span v-if="row.item.type == 1" class="badge rounded-pill bg-success-subtle text-success px-3">
+                                <i class="fa-solid fa-circle-arrow-down me-1"></i> Income
                                 </span>
-                                <span v-else class="badge bg-danger text-white">
-                                    <i class="fa-solid fa-arrow-down me-2"></i>Expense
+                                <span v-else class="badge rounded-pill bg-danger-subtle text-danger px-3">
+                                <i class="fa-solid fa-circle-arrow-up me-1"></i> Expense
                                 </span>
                             </template>
+
+                            <template #cell(category.name)="row">
+                                <div class="d-flex align-items-center">
+                                    <div class="category-icon-sm me-2 d-flex align-items-center justify-content-center rounded-circle"
+                                        :class="getCategoryStyle(row.item.category.name).colorClass"
+                                    >
+                                    <i :class="getCategoryStyle(row.item.category.name).icon"></i>
+                                    </div>
+                                    <span class="fw-medium text-secondary">{{ row.item.category.name }}</span>
+                                </div>
+                            </template>
+
+                            <template #cell(budget.budget_name)="row">
+                                <span :class="[
+                                    'badge rounded-pill px-3',
+                                    row.item.budget ? 'bg-primary-subtle text-primary border border-primary-subtle' : 'bg-light text-muted border'
+                                ]">
+                                    <i class="fa-solid" :class="row.item.budget ? 'fa-wallet me-1' : 'fa-circle-question me-1'"></i>
+                                    {{ row.item.budget ? row.item.budget.budget_name : 'Unallocated' }}
+                                </span>
+                            </template>
+
+                            <template #cell(budget_item.tag)="row">
+                                <span :class="[
+                                    'badge rounded-pill px-3 py-1 fw-normal',
+                                    row.item.budget_item ? 'bg-secondary-subtle text-secondary border border-secondary-subtle font-monospace fst-italic' : 'text-muted small opacity-50'
+                                ]">
+                                    {{ row.item.budget_item ? '#' + row.item.budget_item.tag : '—' }}
+                                </span>
+                            </template>
+
                             <template #cell(amount)="row">
-                                {{ this.formatPeso(row.item.amount) }}
+                                <span :class="row.item.type == 1 ? 'text-success' : 'text-danger'" class="font-monospace">
+                                {{ formatPeso(row.item.amount) }}
+                                </span>
                             </template>
+
                             <template #cell(actions)="row">
-                                <BButton size="sm" variant="warning" @click="fetchTransaction(row.item.id)">Edit</BButton>&nbsp;
-                                <BButton size="sm" variant="danger" @click="deleteTransaction(row.item.id)">Delete</BButton>
+                                <div class="d-flex gap-1">
+                                <BButton size="sm" variant="light" class="text-warning border" @click="fetchTransaction(row.item.id)">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </BButton>
+                                <BButton size="sm" variant="light" class="text-danger border" @click="deleteTransaction(row.item.id)">
+                                    <i class="fa-solid fa-trash"></i>
+                                </BButton>
+                                </div>
                             </template>
                         </BTable>
+
                         <div class="d-flex justify-content-between align-items-center mb-2 py-3">
                             <p>
                                 Showing {{ startRow }}–{{ endRow }} of {{ transactions.length }} rows
@@ -67,53 +124,94 @@
 </div>
 
 <!-- transaction modals -->
-<div class="modal fade" id="transactionModal" tabindex="-1" aria-labelledby="transactionModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="transactionModalLabel">Transaction</h5>
+<div class="modal fade" id="transactionModal" tabindex="-1" aria-labelledby="transactionModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="transactionModalLabel">
+                    <i class="fa-solid fa-money-bill-transfer me-2 text-primary"></i>
+                    {{ form.id ? 'Edit' : 'New' }} Transaction
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form @submit.prevent="submitForm">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Type</label>
-                        <div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="type" id="expense" value="2" v-model="form.type" @change="loadCategories" requied>
-                                <label class="form-check-label" for="expense">Expense</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="type" id="income" value="1" v-model="form.type" @change="loadCategories" required>
-                                <label class="form-check-label" for="income">Income</label>
-                            </div>
+
+            <form @submit.prevent="submitForm" novalidate>
+                <div class="modal-body p-4">
+                    <div class="mb-4 text-center">
+                        <div class="btn-group w-100" role="group" aria-label="Transaction Type">
+                            <input type="radio" class="btn-check" name="type" id="expense" value="2" v-model="form.type" @change="loadCategories" required>
+                            <label class="btn btn-outline-danger py-2" for="expense">
+                            <i class="fa-solid fa-arrow-circle-up me-1"></i> Expense
+                            </label>
+
+                            <input type="radio" class="btn-check" name="type" id="income" value="1" v-model="form.type" @change="loadCategories">
+                            <label class="btn btn-outline-success py-2" for="income">
+                            <i class="fa-solid fa-arrow-circle-down me-1"></i> Income
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="amount" class="form-label small text-uppercase fw-bold text-muted">Amount</label>
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text bg-white border-end-0 text-muted">₱</span>
+                            <input 
+                            type="number" 
+                            class="form-control border-start-0 ps-0 fw-bold" 
+                            :class="form.type == '1' ? 'text-success' : 'text-danger'"
+                            id="amount" 
+                            step="0.01" 
+                            placeholder="0.00" 
+                            v-model="form.amount" 
+                            required
+                            >
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="date" class="form-label">Date</label>
-                        <input type="date" class="form-control" id="date" name="date" v-model="form.date" required>
+                        <label for="description" class="form-label small text-uppercase fw-bold text-muted">Description</label>
+                        <input type="text" class="form-control bg-light border-0" id="description" placeholder="What was this for?" v-model="form.description" required>
                     </div>
-                    <div class="mb-3">
-                        <label for="description" class="form-label">Description</label>
-                        <input type="text" class="form-control" id="description" name="description" placeholder="Description" v-model="form.description" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="amount" class="form-label">Amount</label>
-                        <input type="number" class="form-control" id="amount" name="amount" step="0.01" placeholder="₱0.00" v-model="form.amount" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="category" class="form-label">Category</label>
-                        <select class="form-select" id="category" name="category" v-model="form.category_id" required>
+                    <div class="row gx-3">
+                        <div class="col-md-6 mb-3">
+                            <label for="date" class="form-label small text-uppercase fw-bold text-muted">Date</label>
+                            <input type="date" class="form-control bg-light border-0" id="date" v-model="form.date" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="category" class="form-label small text-uppercase fw-bold text-muted">Category</label>
+                            <select class="form-select bg-light border-0" id="category" v-model="form.category_id" required>
                             <option selected disabled value="">Choose...</option>
-                            <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option>
-                        </select>
+                            <option v-for="category in categories" :key="category.id" :value="category.id">
+                                {{ category.name }}
+                            </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row gx-3">
+                        <div class="col-md-6 mb-3">
+                            <label for="date" class="form-label small text-uppercase fw-bold text-muted">Budget</label>
+                            <select class="form-select bg-light border-0" id="category" v-model="form.budget_id" @change="fetchTags" required>
+                                <option selected disabled value="">Choose...</option>
+                                <option v-for="budget in budgets" :key="budget.id" :value="budget.id">
+                                    {{ budget.budget_name }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="category" class="form-label small text-uppercase fw-bold text-muted">Tag</label>
+                            <select class="form-select bg-light border-0" id="category" v-model="form.budget_item_id" required>
+                                <option selected disabled value="">Choose...</option>
+                                <option v-for="tag in tags" :key="tag.id" :value="tag.id">
+                                    #{{ tag.tag }}
+                                </option>
+                            </select>
+                        </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Save Transaction</button>
+
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill text-muted text-decoration-none px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary px-5 shadow-sm rounded-pill">
+                    Save Transaction
+                    </button>
                 </div>
             </form>
         </div>
@@ -161,6 +259,8 @@
         },
         mounted() {
             this.fetchTransactions();
+            this.loadCategories();
+            this.fetchBudgets();
         },
         data() {
             return {
@@ -171,6 +271,8 @@
                     { key: 'description', label: 'Description', sortable: true },
                     { key: 'amount', label: 'Amount', sortable: true, class: "text-end" },
                     { key: 'category.name', label: 'Category', sortable: true },
+                    { key: 'budget.budget_name', label: 'Budget', sortable: true },
+                    { key: 'budget_item.tag', label: 'Tag', sortable: true },
                     { key: 'actions', label: 'Actions' }
                 ],
                 perPage: ref(10),
@@ -179,6 +281,8 @@
                 filter: ref(''),
                 transactions: [],
                 categories: [],
+                budgets: [],
+                tags: [],
                 form: {
                     id: null,
                     type: null,
@@ -186,6 +290,8 @@
                     description: '',
                     amount: null,
                     category_id: null,
+                    budget_id: null,
+                    budget_item_id: null,
                 },
                 isEditing: false,
                 file: null
@@ -263,6 +369,7 @@
                     callback: (response) => {
                         this.form = response;
                         this.loadCategories();
+                        this.fetchTags();
                         this.isEditing = true;
                         this.openModal('transactionModal');
                     }
@@ -321,7 +428,48 @@
                     this.isLoading = false;
                     this.fetchTransactions();
                 }
+            },
+            fetchBudgets(){
+                axios.get('/api/budgets').then(response => {
+                    this.budgets = response.data;
+                }).catch(error => {
+                    console.error('Error fetching budgets:', error);
+                });
+            },
+            fetchTags(){
+                const budget_id = this.form.budget_id;
+                axios.get(`/budget-items/${budget_id}`).then(response => {
+                    this.tags = response.data;
+                }).catch(error => {
+                    console.error('Error fetching tags:', error);
+                });
             }
         }
     }
 </script>
+
+<style scoped>
+.category-icon-sm {
+  width: 28px;
+  height: 28px;
+  font-size: 0.75rem;
+}
+
+/* Custom Subtles (if not in your Bootstrap version) */
+.bg-orange-subtle { background-color: #fff3e0; }
+.text-orange { color: #ef6c00; }
+
+.bg-purple-subtle { background-color: #f3e5f5; }
+.text-purple { color: #7b1fa2; }
+
+.bg-blue-subtle { background-color: #e3f2fd; }
+.text-blue { color: #1976d2; }
+
+.bg-indigo-subtle { background-color: #e8eaf6; }
+.text-indigo { color: #3f51b5; }
+
+/* Ensure icons are centered */
+.category-icon-sm i {
+  display: block;
+}
+</style>
