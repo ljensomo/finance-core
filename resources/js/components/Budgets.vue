@@ -13,6 +13,7 @@
             <DataTable
                 :items="budgets"
                 :fields="fields"
+                :form-fields="formFields"
                 :utilityUrl="utilityUrl"
                 :module="module"
                 :formatters="formatters"
@@ -25,23 +26,13 @@
         </div>
     </div>
 </div>
-
-    <ModalForm
-        :module="module"
-        :formFields="formFields"
-        :utilityUrl="utilityUrl"
-        :selected-item="selectedItem"
-        @reload-table="loadBudgets"
-    >
-    </ModalForm>
 </template>
 <script>
     // import AddButton from './Shared/AddButton.vue';
     import DataTable from './Shared/DataTable.vue';
-    import ModalForm from './Shared/ModalForm.vue';
 
     export default {
-        components: { DataTable, ModalForm },
+        components: { DataTable },
         data() {
             return {
                 module: 'budget',
@@ -51,16 +42,24 @@
                 viewUrl: '/budget-items',
                 fields: [
                     { key: 'budget_name', label: 'Budget Name', sortable: true },
-                    { key: 'start_date', label: 'Start Date', sortable: true },
-                    { key: 'end_date', label: 'End Date', sortable: true },
+                    { key: 'formatted_start_date', label: 'Start Date', sortable: true },
+                    { key: 'formatted_end_date', label: 'End Date', sortable: true },
                     { key: 'budget', label: 'Budget', sortable: true, class: 'text-end' },
                     { key: 'actual', label: 'Actual', sortable: true, class: 'text-end' },
                     { key: 'remaining', label: 'Remaining', sortable: true, class: 'text-end' },
-                    { key: 'actions', label: 'Actions' }
+                    { key: 'status', label: 'Status'},
+                    { key: 'actions', label: '' }
                 ],
                 formFields: [
                     { key: 'id', label: 'ID', type: 'input', hidden: true, inputType: "text" },
-                    { key: 'budget_name', label: 'Budget Name', type: 'input', required: true, inputType: "text" },
+                    { 
+                        key: 'budget_name', 
+                        label: 'Budget Name', 
+                        type: 'input', 
+                        required: true, 
+                        inputType: "text",
+                        placeholder: 'e.g. Monthly Budget, Vacation Budget'
+                    },
                     { key: 'start_date', label: 'Start Date', type: 'input', required: true, inputType: "date" },
                     { key: 'end_date', label: 'End Date', type: 'input', required: true, inputType: "date" },
                 ],
@@ -77,14 +76,6 @@
                         value: this.formatPeso(val), 
                         class: `font-monospace fw-bold ${val < 0 ? 'text-danger' : 'text-success'}` 
                     }),
-                    start_date: (val) => ({ 
-                        value: val ? new Date(val).toLocaleDateString() : 'N/A', 
-                        class: 'text-muted' 
-                    }),
-                    end_date: (val) => ({ 
-                        value: val ? new Date(val).toLocaleDateString() : 'N/A', 
-                        class: 'text-muted' 
-                    })
                 }
             }
         },

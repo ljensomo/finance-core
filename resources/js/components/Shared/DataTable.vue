@@ -38,7 +38,8 @@
           :filter="filter"
           hover
           responsive
-          class="align-middle mb-0 table-hover table-bordered table-striped"
+          striped
+          class="align-middle mb-0 table-hover table-bordered"
           thead-class="bg-secondary text-uppercase small fw-semibold text-secondary"
         >
           <!-- Category Column Slot -->
@@ -80,13 +81,13 @@
 
                 <BDropdownItem v-if="hasView" @click="handleView(item)">
                   <i class="fa-solid fa-eye text-info me-2 style-width-icon"></i>
-                  <span>View Details</span>
+                  <span>View More</span>
                 </BDropdownItem>
 
-                <BDropdownItem @click="openSubtasksDrawer(item)">
+                <!-- <BDropdownItem @click="openSubtasksDrawer(item)">
                   <i class="fa-solid fa-sidebar text-primary me-2 style-width-icon"></i>
                   <span>Sub-tasks & Remarks</span>
-                </BDropdownItem>
+                </BDropdownItem> -->
 
                 <BDropdownItem @click="handleEdit(item._raw || item)">
                   <i class="fa-solid fa-pen-to-square text-warning me-2 style-width-icon"></i>
@@ -396,7 +397,7 @@ export default {
         },
 
         handleView(item) {
-            this.$emit('view', item);
+            this.$router.push({ path: this.viewUrl, query: { id: item.id } });
         },
 
         handleDelete(id) {

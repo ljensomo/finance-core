@@ -43,7 +43,7 @@ export const Helpers = {
                         title: 'Deleted!',
                         text: successMessage,
                         showConfirmButton: false,
-                        timer: 3000,
+                        timer: 5000,
                         timerProgressBar: true,
                         showCloseButton: true,
                         didOpen: (toast) => {
@@ -197,7 +197,7 @@ export const Helpers = {
                             title: toastTitle,
                             text: successMessage || defaultSuccess,
                             showConfirmButton: false,
-                            timer: 3000,
+                            timer: 5000,
                             timerProgressBar: true,
                             showCloseButton: true,
                             didOpen: (toast) => {

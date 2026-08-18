@@ -16,6 +16,14 @@
   font-size: 0.75rem;
 }
 
+body {
+  font-family: 'Inter', sans-serif !important;
+}
+
+table, .numeric-data {
+  font-variant-numeric: tabular-nums !important;
+}
+
 /* Custom Subtles (if not in your Bootstrap version) */
 .bg-orange-subtle { background-color: #fff3e0; }
 .text-orange { color: #ef6c00; }
