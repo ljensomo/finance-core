@@ -24,6 +24,8 @@ class WishlistController extends Controller
         $wishlist = new Wishlist();
         $wishlist->user_id = auth()->user()->id;
         $wishlist->item = $request->input('item');
+        $wishlist->category = $request->input('category');
+        $wishlist->type = $request->input('type');
         $wishlist->notes = $request->input('notes');
         $wishlist->priority = $request->input('priority');
         $wishlist->status = $request->input('status');
@@ -49,10 +51,13 @@ class WishlistController extends Controller
     {
         $wishlist = Wishlist::findOrFail($id);
         $wishlist->item = $request->input('item');
+        $wishlist->category = $request->input('category');
+        $wishlist->type = $request->input('type');
         $wishlist->notes = $request->input('notes');
         $wishlist->priority = $request->input('priority');
         $wishlist->status = $request->input('status');
         $wishlist->estimated_cost = $request->input('estimated_cost');
+        $wishlist->target_date = $request->input('target_date');
         $wishlist->save();
 
         return response()->json('Wishlist updated successfully.');

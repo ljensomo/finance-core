@@ -9,27 +9,75 @@ export const Helpers = {
                 return [] // or null, depending on your fallback
             }
         },
-        deleteItem(parameters){
-            axios.delete(parameters.url).then(response => {
-                if(response.status == 200) {
-                    this.$swal({
-                        title: 'Deleted!',
-                        text: 'Successfully deleted record!',
-                        icon: 'success',
-                    }).then(() => {
-                        parameters.callback();
-                    });
-                }else{
-                    this.$swal({
-                        title: 'Error!',
-                        text: 'Failed to delete record!',
-                        icon: 'error',
-                    });
-                }
-            }).catch(error => {
-                this.$swal('Error!', parameters.errorMessage, 'error');
-                console.error("error deleting item", error);
+        async deleteItem({
+            url,
+            successMessage = 'Record deleted successfully!',
+            errorMessage = 'Failed to delete record. Please try again.',
+            confirmTitle = 'Are you sure?',
+            confirmText = 'You won\'t be able to revert this!',
+            callback
+        }) {
+            // Confirmation dialog before proceeding with deletion
+            const confirmation = await this.$swal({
+                title: confirmTitle,
+                text: confirmText,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel'
             });
+
+            if (!confirmation.isConfirmed) return;
+
+            try {
+                const response = await axios.delete(url);
+
+                if (response.status >= 200 && response.status < 300) {
+                    // Interactive SweetAlert Toast
+                    this.$swal({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Deleted!',
+                        text: successMessage,
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        showCloseButton: true,
+                        didOpen: (toast) => {
+                            toast.addEventListener('mouseenter', this.$swal.stopTimer);
+                            toast.addEventListener('mouseleave', this.$swal.resumeTimer);
+                        }
+                    });
+
+                    if (typeof callback === 'function') {
+                        callback(response.data);
+                    }
+                }
+            } catch (error) {
+                console.error('Error during DELETE request:', error);
+
+                const detailedError = error.response?.data?.message || errorMessage;
+
+                // Interactive Error Alert with dynamic retry
+                this.$swal({
+                    icon: 'error',
+                    title: 'Action Failed',
+                    text: detailedError,
+                    showCancelButton: true,
+                    confirmButtonText: 'Try Again',
+                    cancelButtonText: 'Close',
+                    confirmButtonColor: '#0d6efd',
+                    cancelButtonColor: '#6c757d',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Re-trigger the deletion request on retry
+                        this.deleteItem({ url, successMessage, errorMessage, confirmTitle, confirmText, callback });
+                    }
+                });
+            }
         },
         async fetchItem(parameters){
             try {
@@ -63,24 +111,127 @@ export const Helpers = {
                 }
             });
         },
-        addItem(parameters){
-            axios.post(parameters.url, parameters.data)
-            .then(response => {
-                if(response.status == 200) {
+        async addItem({ 
+            url, 
+            data, 
+            successMessage = 'Record added successfully!', 
+            errorMessage = 'Something went wrong. Please try again.', 
+            callback 
+        }) {
+            try {
+                const response = await axios.post(url, data);
+
+                // Accept 200 OK or 201 Created
+                if (response.status >= 200 && response.status < 300) {
+                    // Non-blocking interactive SweetAlert Toast
                     this.$swal({
-                        title: 'Done!',
-                        text: parameters.successMessage,
+                        toast: true,
+                        position: 'top-end',
                         icon: 'success',
-                    }).then(() => {
-                        parameters.callback();
+                        title: 'Saved!',
+                        text: successMessage,
+                        showConfirmButton: false,
+                        timer: 4000,
+                        timerProgressBar: true,
+                        showCloseButton: true,
+                        didOpen: (toast) => {
+                            // Pause timer on hover so user has time to read
+                            toast.addEventListener('mouseenter', this.$swal.stopTimer);
+                            toast.addEventListener('mouseleave', this.$swal.resumeTimer);
+                        }
                     });
-                }else{
-                    this.$swal( 'Error!', parameters.errorMessage, 'error');
+
+                    // Execute callback immediately
+                    if (typeof callback === 'function') {
+                        callback(response.data);
+                    }
                 }
-            }).catch(error => {
-                this.$swal('Error!', parameters.errorMessage, 'error');
-                console.error("error adding item", error);
-            });
+            } catch (error) {
+                console.error("Error adding item:", error);
+
+                // Fall back to server message if available (e.g. 422 validation errors)
+                const detailedError = error.response?.data?.message || errorMessage;
+
+                // Interactive Error Alert with retry action
+                this.$swal({
+                    icon: 'error',
+                    title: 'Action Failed',
+                    text: detailedError,
+                    showCancelButton: true,
+                    confirmButtonText: 'Try Again',
+                    cancelButtonText: 'Close',
+                    confirmButtonColor: '#0d6efd',
+                    cancelButtonColor: '#6c757d',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        this.addItem({ url, data, successMessage, errorMessage, callback });
+                    }
+                });
+            }
+        },
+        async saveItem({
+                url,
+                data,
+                method = 'post', // 'post', 'put', or 'patch'
+                successMessage,
+                errorMessage = 'Something went wrong. Please try again.',
+                callback
+            }) {
+                const httpMethod = method.toLowerCase();
+                const isPost = httpMethod === 'post';
+
+                // Default messages based on action
+                const defaultSuccess = isPost ? 'Record created successfully!' : 'Record updated successfully!';
+                const toastTitle = isPost ? 'Created!' : 'Updated!';
+
+                try {
+                    // Dynamically invoke axios method (axios.post, axios.put, etc.)
+                    const response = await axios[httpMethod](url, data);
+
+                    if (response.status >= 200 && response.status < 300) {
+                        // Interactive SweetAlert Toast
+                        this.$swal({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: toastTitle,
+                            text: successMessage || defaultSuccess,
+                            showConfirmButton: false,
+                            timer: 3000,
+                            timerProgressBar: true,
+                            showCloseButton: true,
+                            didOpen: (toast) => {
+                                toast.addEventListener('mouseenter', this.$swal.stopTimer);
+                                toast.addEventListener('mouseleave', this.$swal.resumeTimer);
+                            }
+                        });
+
+                        if (typeof callback === 'function') {
+                            callback(response.data);
+                        }
+                    }
+                } catch (error) {
+                    console.error(`Error during ${httpMethod.toUpperCase()} request:`, error);
+
+                    const detailedError = error.response?.data?.message || errorMessage;
+
+                    // Interactive Error Alert with dynamic retry
+                    this.$swal({
+                        icon: 'error',
+                        title: 'Action Failed',
+                        text: detailedError,
+                        showCancelButton: true,
+                        confirmButtonText: 'Try Again',
+                        cancelButtonText: 'Close',
+                        confirmButtonColor: '#0d6efd',
+                        cancelButtonColor: '#6c757d',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Re-trigger the exact same dynamic request on retry
+                            this.saveItem({ url, data, method, successMessage, errorMessage, callback });
+                        }
+                    });
+                }
         },
         fetchCategories(type = null){
             try{
@@ -126,39 +277,55 @@ export const Helpers = {
                 callback();
             }
         },
-        submitForm(e, parameters = null){
-            e.preventDefault();
-            
-            if(this.isEditing){
-                this.updateItem({
-                    url: parameters.updateUrl,
-                    data: parameters.form,
-                    successMessage: parameters.title+' updated successfully!',
-                    errorMessage: 'Failed to update '+parameters.title,
-                    callback: () => {
-                        e.target.reset();
-                        this.editing = false;
-                        if(parameters.callback != null){
-                            parameters.callback();
-                        }
-                        this.closeModal(parameters.modalId);
-                    }
-                });
-            }else{
-                this.addItem({
-                    url: parameters.addUrl,
-                    data: parameters.form,
-                    successMessage: parameters.title+' added successfully!',
-                    errorMessage: 'Failed to add '+parameters.title,
-                    callback: () => {
-                        e.target.reset();
-                        if(parameters.callback != null){
-                            parameters.callback();
-                        }
-                        this.closeModal(parameters.modalId);
-                    }
-                })
+        submitForm(e, parameters = {}) {
+            if (e && typeof e.preventDefault === 'function') {
+                e.preventDefault();
             }
+
+            // Safe destructuring with fallback values
+            const {
+                form = {},
+                updateUrl,
+                addUrl,
+                title = 'Record',
+                modalId = null,
+                callback
+            } = parameters || {};
+
+            // Dynamic resolution based on edit state
+            const isEditing = Boolean(this.isEditing || this.editing || this.isEditMode);
+            const action = isEditing ? 'updated' : 'added';
+            const verb = isEditing ? 'update' : 'add';
+            const method = isEditing ? 'put' : 'post';
+            const url = isEditing ? updateUrl : addUrl;
+
+            this.saveItem({
+                url,
+                data: form,
+                method,
+                successMessage: `${title} ${action} successfully!`,
+                errorMessage: `Failed to ${verb} ${title}.`,
+                callback: (responseData) => {
+                    // Safely reset native DOM form if available
+                    if (e?.target && typeof e.target.reset === 'function') {
+                        e.target.reset();
+                    }
+
+                    // Synchronize reactive edit state flags
+                    this.isEditing = false;
+                    this.editing = false;
+
+                    // Execute component callback
+                    if (typeof callback === 'function') {
+                        callback(responseData);
+                    }
+
+                    // Conditionally close modal if modalId is supplied
+                    if (modalId && typeof this.closeModal === 'function') {
+                        this.closeModal(modalId);
+                    }
+                }
+            });
         },
         capitalizeFirstLetter(text) {
             return text.charAt(0).toUpperCase() + text.slice(1);
