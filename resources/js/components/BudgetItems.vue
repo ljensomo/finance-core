@@ -73,6 +73,7 @@
                 <DataTable
                     :items="budgets"
                     :fields="fields"
+                    :form-fields="formFields"
                     :utilityUrl="utilityUrl"
                     :module="module"
                     :formatters="formatters"
@@ -140,12 +141,12 @@
                 formFields: [
                     { key: 'id', label: 'ID', type: 'input', hidden: true, inputType: "text" },
                     { key: 'budget_id', label: 'Budget ID', type: 'defaultInput', hidden: true, required: true, inputType: "text", value: this.$route.query.id },
-                    { key: 'item_name', label: 'Item Name', type: 'input', required: true, inputType: "text" },
-                    { key: 'category_id', label: 'Category', type: 'select', required: true, options: [] },
+                    { key: 'item_name', label: 'Item Name', type: 'input', required: true, inputType: "text", placeholder: 'e.g. Groceries, Rent, Utilities' },
+                    { key: 'category_id', label: 'Category', type: 'select', required: true, options: [], placeholder: 'Select a category' },
                     // { key: 'sub_category_id', label: 'Sub Category', type: 'select', options: [] },
-                    { key: 'amount', label: 'Amount', type: 'input', required: true, inputType:"number" },
-                    { key: 'description', label: 'Description', type: 'textarea', required: true, inputType: "text" },
-                    { key: 'tag', label: 'Tag', type: 'input', required: false, inputType: "text" },
+                    { key: 'amount', label: 'Amount', type: 'input', required: true, inputType:"number", placeholder: 'e.g. 1000, 500, 250' },
+                    { key: 'description', label: 'Description', type: 'textarea', required: true, inputType: "text", placeholder: 'e.g. Monthly grocery expenses, Rent for apartment, Utility bills' },
+                    { key: 'tag', label: 'Tag', type: 'input', required: false, inputType: "text", placeholder: 'e.g. #groceries, #rent, #utilities' },
                 ],
                 formatters: {
                     amount: (val) => ({ 

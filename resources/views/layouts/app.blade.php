@@ -191,8 +191,8 @@
                                 <i class="fas fa-chevron-right small transition-all"></i>
                             </a>
                             <ul class="collapse list-unstyled ps-4 mt-1" id="settingsSubmenu">
-                                <li><a class="nav-link py-1 text-secondary" href="settings"><i class="fa-solid fa-bars me-2 tiny-icon"></i> {{ __('Categories') }}</a></li>
-                                <li><a class="nav-link py-1 text-secondary" href="user-profile"><i class="fa-solid fa-bars me-2 tiny-icon"></i> {{ __('Sub Categories') }}</a></li>
+                                <li><a class="nav-link py-1 text-secondary" href="categories"><i class="fa-solid fa-bars me-2 tiny-icon"></i> {{ __('Categories') }}</a></li>
+                                <li><a class="nav-link py-1 text-secondary" href="sub-categories"><i class="fa-solid fa-bars me-2 tiny-icon"></i> {{ __('Sub Categories') }}</a></li>
                             </ul>
                         </li>
                     </ul>
