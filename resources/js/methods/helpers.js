@@ -261,14 +261,20 @@ export const Helpers = {
             }).format(value);
         },
         closeModal(modalId) {
-            const modalElement = document.getElementById(modalId);
-            const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
-            modal.hide();
+            // const modalElement = document.getElementById(modalId);
+            // const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+            // modal.hide();
+            const drawerElement = document.getElementById(modalId);
+            const drawer = bootstrap.Offcanvas.getOrCreateInstance(drawerElement);
+            drawer.hide();
         },
         openModal(modalId) {
-            const modalElement = document.getElementById(modalId);
-            const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
-            modal.show();
+            // const modalElement = document.getElementById(modalId);
+            // const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+            // modal.show();
+            const drawerElement = document.getElementById(modalId);
+            const drawer = bootstrap.Offcanvas.getOrCreateInstance(drawerElement);
+            drawer.show();
         },
         triggerAddModal(modalId, callback = null){
             this.isEditing = false;

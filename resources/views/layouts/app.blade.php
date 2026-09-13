@@ -221,7 +221,7 @@
                         </li>
                     </ul>
                 </nav>
-                <main class="flex-grow-1 py-4" style="margin-top: 50px; padding-left: 250px; background-color: #e9ecef !important;">
+                <main class="flex-grow-1 py-4" style="margin-top: 50px; padding-left: 250px; background-color: #e9ecef !important; height: 100vh;">
                     @yield('content')
                 </main>
             @endauth

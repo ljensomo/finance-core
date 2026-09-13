@@ -1,6 +1,120 @@
 <template>
     <!-- Page Content -->
     <div class="container-fluid">
+        <div class="row g-3 mb-3">
+            <!-- Expenses Card (This Month + Overall) -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card border border-secondary-subtle rounded-4 shadow-sm h-100">
+                    <div class="card-body p-3 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="text-muted small fw-medium text-uppercase">Total Expense</span>
+                                <div class="icon-box bg-danger-subtle text-danger px-2 py-1 rounded-circle">
+                                    <i class="fa-solid fa-arrow-trend-down small"></i>
+                                </div>
+                            </div>
+                            <!-- Main Metric (Current Month) -->
+                            <h3 class="fw-bold mb-1 font-monospace text-danger">
+                                {{ formatPeso(currentMonthExpense) }}
+                            </h3>
+                            <p class="text-muted small mb-0">This month</p>
+                        </div>
+
+                        <!-- Secondary Metric (Overall) -->
+                        <div class="border-top pt-2 mt-3 d-flex justify-content-between align-items-center">
+                            <span class="text-muted extra-small">Overall Expenses:</span>
+                            <span class="fw-semibold font-monospace text-secondary small">
+                                {{ formatPeso(totalExpense) }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Income Card (This Month + Overall) -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card border border-secondary-subtle rounded-4 shadow-sm h-100">
+                    <div class="card-body p-3 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="text-muted small fw-medium text-uppercase">Total Income</span>
+                                <div class="icon-box bg-success-subtle text-success px-2 py-1 rounded-circle">
+                                    <i class="fa-solid fa-arrow-trend-up small"></i>
+                                </div>
+                            </div>
+                            <!-- Main Metric (Current Month) -->
+                            <h3 class="fw-bold mb-1 font-monospace text-success">
+                                {{ formatPeso(currentMonthIncome) }}
+                            </h3>
+                            <p class="text-muted small mb-0">This month</p>
+                        </div>
+
+                        <!-- Secondary Metric (Overall) -->
+                        <div class="border-top pt-2 mt-3 d-flex justify-content-between align-items-center">
+                            <span class="text-muted extra-small">Overall Income:</span>
+                            <span class="fw-semibold font-monospace text-secondary small">
+                                {{ formatPeso(totalIncome) }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Net Savings / Cash Flow Card -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card border border-secondary-subtle rounded-4 shadow-sm h-100">
+                    <div class="card-body p-3 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="text-muted small fw-medium text-uppercase">Net Balance</span>
+                                <div class="icon-box bg-primary-subtle text-primary px-2 py-1 rounded-circle">
+                                    <i class="fa-solid fa-wallet small"></i>
+                                </div>
+                            </div>
+                            <!-- Main Metric (Current Month Net) -->
+                            <h3 class="fw-bold mb-1 font-monospace" :class="(currentMonthIncome - currentMonthExpense) >= 0 ? 'text-primary' : 'text-danger'">
+                                {{ formatPeso(currentMonthIncome - currentMonthExpense) }}
+                            </h3>
+                            <p class="text-muted small mb-0">This month net</p>
+                        </div>
+
+                        <!-- Secondary Metric (Overall Net) -->
+                        <div class="border-top pt-2 mt-3 d-flex justify-content-between align-items-center">
+                            <span class="text-muted extra-small">Overall Balance:</span>
+                            <span class="fw-semibold font-monospace text-secondary small">
+                                {{ formatPeso(totalIncome - totalExpense) }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Graph Card -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card border border-secondary-subtle rounded-4 shadow-sm h-100">
+                    <div class="card-body p-3 d-flex flex-column justify-content-between">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-muted small fw-medium text-uppercase">Expense Trend</span>
+                            <i class="fa-solid fa-chart-line text-primary small"></i>
+                        </div>
+                        
+                        <!-- Graph Placeholder Container -->
+                        <div class="d-flex align-items-center justify-content-center flex-grow-1 py-2">
+                            <!-- Chart Component Goes Here -->
+                            <div class="text-center text-muted">
+                                <i class="fa-solid fa-chart-column fa-xl text-primary-subtle mb-1"></i>
+                                <span class="d-block extra-small text-secondary">Mini Graph</span>
+                            </div>
+                        </div>
+
+                        <div class="border-top pt-2 mt-1 d-flex justify-content-between align-items-center">
+                            <span class="text-muted extra-small">Last 6 Months</span>
+                            <span class="badge bg-light text-secondary border extra-small">Active</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="row justify-content-center">
             <div class="col-md-12">
                 <div class="card shadow-sm border border-secondary-subtle rounded-4 overflow-hidden">
@@ -209,172 +323,181 @@
     </div>
 
     <!-- Transaction Modal -->
-    <div class="modal fade" id="transactionModal" tabindex="-1" aria-labelledby="transactionModalLabel" aria-hidden="true" data-bs-backdrop="static">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-2 rounded-4 transition-all">
-                <div class="modal-header border-0 pb-0 pt-4 px-4">
-                    <h5 class="modal-title fw-bolder d-flex align-items-center" id="transactionModalLabel">
-                        <i class="fa-solid fa-money-bill-transfer me-3 fs-4" 
-                        :class="form.type == '1' ? 'text-success' : 'text-danger'"></i>
-                        <span class="text-dark">{{ form.id ? 'Edit' : 'New' }} Transaction</span>
-                    </h5>
-                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="offcanvas offcanvas-end border-0 shadow" tabindex="-1" id="transactionModal" style="width: 550px;">
+        
+        <!-- Drawer Header -->
+        <div class="offcanvas-header border-bottom py-3 px-4 flex-shrink-0">
+            <h5 class="offcanvas-title fw-bolder d-flex align-items-center mb-0" id="transactionModalLabel">
+                <i class="fa-solid fa-money-bill-transfer me-3 fs-4" 
+                :class="form.type == '1' ? 'text-success' : 'text-danger'"></i>
+                <span class="text-dark">{{ form.id ? 'Edit' : 'New' }} Transaction</span>
+            </h5>
+            <button type="button" class="btn-close shadow-none" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+
+        <!-- Form & Body Structure -->
+        <form @submit.prevent="submitForm" novalidate class="d-flex flex-column h-100 mb-0 overflow-hidden">
+            
+            <!-- Scrollable Body Container -->
+            <div class="offcanvas-body p-4 flex-grow-1" style="overflow-y: auto; min-height: 0;">
+                
+                <!-- Type Switcher -->
+                <div class="mb-4">
+                    <div class="btn-group w-100 rounded-pill overflow-hidden border p-1 bg-light" role="group" aria-label="Transaction Type">
+                        <input type="radio" checked class="btn-check" name="type" id="expense" value="2" v-model="form.type" @change="loadCategories" required>
+                        <label 
+                            class="btn border-0 py-3 fw-bold d-flex align-items-center justify-content-center text-danger rounded-pill" 
+                            :class="form.type == 2 ? 'bg-danger-subtle border border-danger-subtle shadow-sm' : 'bg-transparent opacity-50'" 
+                            for="expense">
+                                <i class="fa-solid fa-circle-arrow-down me-2"></i> Expense
+                        </label>
+
+                        <input type="radio" class="btn-check" name="type" id="income" value="1" v-model="form.type" @change="loadCategories">
+                        <label 
+                            class="btn border-0 py-3 fw-bold d-flex align-items-center justify-content-center text-success rounded-pill" 
+                            :class="form.type == 1 ? 'bg-success-subtle border border-success-subtle shadow-sm' : 'bg-transparent opacity-50'" 
+                            for="income">
+                                <i class="fa-solid fa-circle-arrow-up me-2"></i> Income
+                        </label>
+                    </div>
                 </div>
 
-                <form @submit.prevent="submitForm" novalidate>
-                    <div class="modal-body p-4">
-                        
-                        <div class="mb-4">
-                            <div class="btn-group w-100 rounded-pill overflow-hidden border" role="group" aria-label="Transaction Type">
-                                <input type="radio" checked class="btn-check" name="type" id="expense" value="2" v-model="form.type" @change="loadCategories" required>
-                                <label class="btn btn-outline-danger border-0 py-3 fw-bold d-flex align-items-center justify-content-center" for="expense">
-                                    <i class="fa-solid fa-arrow-up-from-bracket me-2"></i> Expense
-                                </label>
+                <!-- Amount Input -->
+                <div class="mb-4 text-center amount-container p-3 rounded-3 bg-light border">
+                    <label for="amount" class="form-label small text-uppercase fw-bold text-muted mb-1">Amount</label>
+                    <div class="input-group input-group-lg justify-content-center">
+                        <span class="input-group-text bg-transparent border-0 border-bottom fs-1 fw-black"
+                            :class="form.type == '1' ? 'text-success' : 'text-danger'">₱</span>
+                        <input 
+                            type="number" 
+                            class="form-control bg-transparent border-0 border-bottom ps-1 fs-1 fw-black shadow-none text-center" 
+                            :class="form.type == '1' ? 'text-success' : 'text-danger'"
+                            id="amount" 
+                            step="0.01" 
+                            placeholder="0.00" 
+                            v-model="form.amount" 
+                            required
+                            style="max-width: 200px;"
+                        >
+                    </div>
+                </div>
 
-                                <input type="radio" class="btn-check" name="type" id="income" value="1" v-model="form.type" @change="loadCategories">
-                                <label class="btn btn-outline-success border-0 py-3 fw-bold d-flex align-items-center justify-content-center" for="income">
-                                    <i class="fa-solid fa-arrow-down-to-bracket me-2"></i> Income
-                                </label>
-                            </div>
+                <!-- Description & Date Inputs -->
+                <div class="row g-2 mb-4">
+                    <div class="col-7">
+                        <div class="form-floating custom-floating">
+                            <input 
+                                type="text" 
+                                class="form-control border-0 border-bottom rounded-0 px-2 pt-4 pb-2 shadow-none focus-ring" 
+                                :class="form.type == '1' ? 'focus-ring-success' : 'focus-ring-danger'"
+                                id="description" 
+                                placeholder="What was this for?" 
+                                v-model="form.description" 
+                                required
+                            >
+                            <label for="description" class="text-muted ps-2 pt-2">Description</label>
                         </div>
+                    </div>
 
-                        <div class="mb-4 text-center amount-container p-3 rounded-3 bg-light border">
-                            <label for="amount" class="form-label small text-uppercase fw-bold text-muted mb-1">Amount</label>
-                            <div class="input-group input-group-lg justify-content-center">
-                                <span class="input-group-text bg-transparent border-0 border-bottom fs-1 fw-black"
-                                    :class="form.type == '1' ? 'text-success' : 'text-danger'">₱</span>
-                                <input 
-                                    type="number" 
-                                    class="form-control bg-transparent border-0 border-bottom ps-1 fs-1 fw-black width-auto shadow-none" 
-                                    :class="form.type == '1' ? 'text-success' : 'text-danger'"
-                                    id="amount" 
-                                    step="0.01" 
-                                    placeholder="0.00" 
-                                    v-model="form.amount" 
-                                    required
-                                    style="max-width: 220px;"
-                                >
-                            </div>
+                    <div class="col-5">
+                        <div class="form-floating custom-floating">
+                            <input 
+                                type="date" 
+                                class="form-control border-0 border-bottom rounded-0 px-2 pt-4 pb-2 shadow-none" 
+                                id="date" 
+                                placeholder="YYYY-MM-DD" 
+                                v-model="form.date" 
+                                required
+                            >
+                            <label for="date" class="text-muted ps-2 pt-2">Date</label>
                         </div>
+                    </div>
+                </div>
 
-                        <div class="row gx-3 mb-4">
-                            <!-- Description Field -->
-                            <div class="col-md-7 mb-3 mb-md-0">
-                                <div class="form-floating custom-floating">
-                                    <input 
-                                        type="text" 
-                                        class="form-control border-0 border-bottom rounded-0 px-2 pt-4 pb-2 shadow-none" 
-                                        id="description" 
-                                        placeholder="What was this for?" 
-                                        v-model="form.description" 
-                                        required
-                                    >
-                                    <label for="description" class="text-muted ps-2 pt-2">Description (e.g., Jollibee Dinner)</label>
-                                </div>
-                            </div>
-
-                            <!-- Date Field -->
-                            <div class="col-md-5">
-                                <div class="form-floating custom-floating">
-                                    <input 
-                                        type="date" 
-                                        class="form-control border-0 border-bottom rounded-0 px-2 pt-4 pb-2 shadow-none" 
-                                        id="date" 
-                                        placeholder="YYYY-MM-DD" 
-                                        v-model="form.date" 
-                                        required
-                                    >
-                                    <label for="date" class="text-muted ps-2 pt-2">Date</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row gx-3 mb-3">
-                            <div class="col-md-7 mb-3 mb-md-0">
-                                <label class="form-label small text-uppercase fw-bold text-muted d-block mb-1">Category</label>
-                                <div class="interactive-scroll-container p-1 border rounded-3 bg-white">
-                                    <div class="row g-2">
-                                        <div class="col-4" v-for="category in categories" :key="category.id">
-                                            <button 
-                                                type="button" 
-                                                class="btn btn-sm w-100 py-2 px-1 border rounded-3 text-center transition-all d-flex flex-column align-items-center justify-content-center option-card"
-                                                :class="form.category_id === category.id 
-                                                    ? (form.type == '1' ? 'btn-success text-white border-success shadow-sm' : 'btn-danger text-white border-danger shadow-sm') 
-                                                    : 'btn-light text-dark border-0 bg-light'"
-                                                @click="form.category_id = category.id"
-                                            >
-                                                <i :class="[category.icon || 'fa-solid fa-layer-group', 'fs-6 mb-1']"></i>
-                                                <span class="small text-truncate w-100 fw-medium" style="font-size: 0.72rem;">
-                                                    {{ category.name }}
-                                                </span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-5">
-                                <label class="form-label small text-uppercase fw-bold text-muted d-block mb-1">Budget Source</label>
-                                
-                                <!-- Updated to use interactive-scroll-container -->
-                                <div class="interactive-scroll-container p-1 border rounded-3 bg-white">
-                                    <div class="d-flex flex-column gap-1">
-                                        <button 
-                                            type="button" 
-                                            v-for="budget in budgets" 
-                                            :key="budget.id"
-                                            class="btn btn-sm w-100 py-2 px-3 border rounded-3 text-start transition-all d-flex align-items-center gap-2 option-card shadow-none"
-                                            :class="form.budget_id === budget.id 
-                                                ? (form.type == '1' ? 'btn-success text-white border-success shadow-sm' : 'btn-danger text-white border-danger shadow-sm') 
-                                                : 'btn-light text-dark border-0 bg-light'"
-                                            @click="selectBudget(budget.id)"
-                                        >
-                                            <i class="fa-solid fa-wallet fs-6"></i>
-                                            <span class="small text-truncate fw-medium" style="font-size: 0.75rem;">
-                                                {{ budget.budget_name }}
-                                            </span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mb-3" v-if="tags && tags.length">
-                            <label class="form-label small text-uppercase fw-bold text-muted d-block mb-1">Specific Tag</label>
-                            <div class="d-flex flex-wrap gap-2 p-2 border rounded-3 bg-white" style="max-height: 100px; overflow-y: auto;">
+                <!-- Category Grid -->
+                <div class="mb-4">
+                    <label class="form-label small text-uppercase fw-bold text-muted d-block mb-1">Category</label>
+                    <div class="interactive-scroll-container p-2 border rounded-3 bg-white" style="max-height: 160px; overflow-y: auto;">
+                        <div class="row g-2">
+                            <div class="col-4" v-for="category in categories" :key="category.id">
                                 <button 
                                     type="button" 
-                                    v-for="tag in tags" 
-                                    :key="tag.id"
-                                    class="btn btn-sm rounded-pill px-3 py-1 transition-all border d-flex align-items-center gap-1"
-                                    :class="form.budget_item_id === tag.id 
-                                        ? (form.type == '1' ? 'btn-success text-white border-success shadow-sm' : 'btn-danger text-white border-danger shadow-sm') 
-                                        : 'btn-light text-secondary border-0 bg-light'"
-                                    @click="form.budget_item_id = tag.id"
+                                    class="btn btn-sm w-100 py-2 px-1 border rounded-3 text-center transition-all d-flex flex-column align-items-center justify-content-center option-card"
+                                    :class="form.category_id === category.id 
+                                        ? (form.type == '1' ? 'bg-success-subtle text-success border-success-subtle shadow-sm' : 'bg-danger-subtle text-danger border-danger shadow-sm') 
+                                        : 'btn-light text-dark border-0 bg-light'"
+                                    @click="form.category_id = category.id"
                                 >
-                                    <span class="fw-bold" style="font-size: 0.75rem;">#{{ tag.tag }}</span>
+                                    <i :class="[category.icon || 'fa-solid fa-layer-group', 'fs-6 mb-1']"></i>
+                                    <span class="small text-truncate w-100 fw-medium" style="font-size: 0.72rem;">
+                                        {{ category.name }}
+                                    </span>
                                 </button>
                             </div>
                         </div>
-
                     </div>
+                </div>
 
-                    <div class="modal-footer border-0 p-4 pt-0">
+                <!-- Budget Source -->
+                <div class="mb-4">
+                    <label class="form-label small text-uppercase fw-bold text-muted d-block mb-1">Budget Source</label>
+                    <div class="interactive-scroll-container p-2 border rounded-3 bg-white" style="max-height: 140px; overflow-y: auto;">
+                        <div class="d-flex flex-column gap-1">
+                            <button 
+                                type="button" 
+                                v-for="budget in budgets" 
+                                :key="budget.id"
+                                class="btn btn-sm w-100 py-2 px-3 border rounded-3 text-start transition-all d-flex align-items-center gap-2 option-card shadow-none"
+                                :class="form.budget_id === budget.id 
+                                    ? (form.type == '1' ? 'bg-success-subtle text-success border-success-subtle shadow-sm' : 'bg-danger-subtle text-danger border-danger shadow-sm') 
+                                    : 'btn-light text-dark border-0 bg-light'"
+                                @click="selectBudget(budget.id)"
+                            >
+                                <i class="fa-solid fa-wallet fs-6"></i>
+                                <span class="small text-truncate fw-medium" style="font-size: 0.75rem;">
+                                    {{ budget.budget_name }}
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Specific Tag -->
+                <div class="mb-3" v-if="tags && tags.length">
+                    <label class="form-label small text-uppercase fw-bold text-muted d-block mb-1">Specific Tag</label>
+                    <div class="d-flex flex-wrap gap-2 p-2 border rounded-3 bg-white" style="max-height: 120px; overflow-y: auto;">
                         <button 
                             type="button" 
-                            class="btn btn-outline-secondary border-1 rounded-pill px-4 fw-semibold" 
-                            data-bs-dismiss="modal"
+                            v-for="tag in tags" 
+                            :key="tag.id"
+                            class="btn btn-sm rounded-pill px-3 py-1 transition-all border d-flex align-items-center gap-1"
+                            :class="form.budget_item_id === tag.id 
+                                ? (form.type == '1' ? 'bg-success-subtle text-success border-success-subtle shadow-sm' : 'bg-danger-subtle text-danger border-danger shadow-sm') 
+                                : 'btn-light text-secondary border-0 bg-light'"
+                            @click="form.budget_item_id = tag.id"
                         >
-                            Cancel
-                        </button>
-                        <button type="submit" class="btn btn-success px-5 shadow-sm rounded-pill fw-bold">
-                            <i class="fa-solid fa-check me-2"></i>
-                            Save
+                            <span class="fw-bold" style="font-size: 0.75rem;">#{{ tag.tag }}</span>
                         </button>
                     </div>
-                </form>
+                </div>
+
             </div>
-        </div>
+
+            <!-- Fixed Sticky Footer -->
+            <div class="offcanvas-footer p-3 border-top bg-light d-flex align-items-center justify-content-end gap-2 flex-shrink-0 mt-auto">
+                <button 
+                    type="button" 
+                    class="btn btn-outline-secondary rounded-pill px-4 fw-semibold" 
+                    data-bs-dismiss="offcanvas"
+                >
+                    Cancel
+                </button>
+                <button type="submit" class="btn btn-success rounded-pill px-4 fw-bold">
+                    <i class="fa-solid fa-check me-1"></i>
+                    Save
+                </button>
+            </div>
+        </form>
     </div>
 
     <!-- Import modal -->
@@ -428,7 +551,7 @@
                 isTableLoading: true,
                 fields: [
                     { key: 'type', label: 'Type', sortable: true },
-                    { key: 'date', label: 'Date', sortable: true },
+                    { key: 'formatted_date', label: 'Date', sortable: true },
                     { key: 'description', label: 'Description', sortable: true },
                     { key: 'amount', label: 'Amount', sortable: true, class: "text-end" },
                     { key: 'category.name', label: 'Category', sortable: true },
@@ -499,9 +622,10 @@
                 e.preventDefault();
 
                 if(this.isEditing){
-                    this.updateItem({
+                    this.saveItem({
                         url: `/api/transactions/${this.form.id}`,
                         data: this.form,
+                        method: 'put',
                         successMessage: 'Transaction updated successfully!',
                         errorMessage: 'Failed to update transaction.',
                         callback: () => {
@@ -512,7 +636,7 @@
                         }
                     });
                 }else{
-                    this.addItem({
+                    this.saveItem({
                         url: '/api/transactions',
                         data: this.form,
                         successMessage: 'Transaction added successfully!',
