@@ -47,10 +47,10 @@
                         class="align-middle border-top"
                         thead-class="table-light text-uppercase small fw-bold"
                         :tbody-tr-class="getRowClass"
+                        :tbody-transition-props="tableTransition"
                     >
                         <template #table-busy>
-                            <div class="text-center text-primary my-4 py-3">
-                                <!-- Standard HTML Bootstrap Spinner fallback -->
+                            <div class="text-center text-primary my-4 py-4 bg-dark-subtle rounded-3">
                                 <div class="spinner-border spinner-border-sm me-2" role="status"></div>
                                 <span class="fw-medium text-secondary">Loading budgets...</span>
                             </div>
@@ -58,7 +58,7 @@
 
                         <template #cell(budget_name)="row">
                             <router-link 
-                                :to="`/budget-items/${row.item.id}`"
+                                :to="{ path: '/budget-items', query: { id: row.item.id } }"
                                 class="text-decoration-none fw-semibold text-primary link-offset-2-hover link-underline-hover"
                             >
                                 {{ row.item.budget_name }}
@@ -332,6 +332,12 @@
                 perPage: ref(10),
                 currentPage: ref(1),
                 rows: ref(0),
+                filter: ref(''),
+                tableTransition: {
+                    name: 'fade',
+                    appear: true,
+                    mode: 'out-in'
+                },
             }
         },
         computed: {
@@ -439,3 +445,16 @@
         },
     }
 </script>
+
+<style scoped>
+    /* Vue Transition Fade Effect */
+    .fade-enter-active,
+    .fade-leave-active {
+        transition: opacity 0.35s ease-in-out;
+    }
+
+    .fade-enter-from,
+    .fade-leave-to {
+        opacity: 0;
+    }
+</style>
