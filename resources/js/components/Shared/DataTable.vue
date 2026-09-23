@@ -6,42 +6,50 @@
         <BButton 
           variant="primary" 
           size="sm" 
-          class="d-flex align-items-center gap-2 shadow-sm"
+          class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm"
           @click="handleAdd"
         >
           <i class="fa-solid fa-plus"></i>
-          <span>Add New Record</span>
+          <span> Add New Record</span>
         </BButton>
       </div>
       <div class="col-md-4">
-        <div class="input-group shadow-sm">
-          <span class="input-group-text bg-white border-end-0">
+        <div class="input-group input-group-sm rounded-pill overflow-hidden shadow-sm">
+          <span class="input-group-text bg-light border-secondary-subtle border-end-0 text-muted rounded-start-pill ps-3">
             <i class="fa-solid fa-magnifying-glass text-muted"></i>
           </span>
           <BFormInput
             v-model="filter"
             placeholder="Search records..."
-            class="border-start-0 ps-0"
+            class="border-secondary-subtle border-start-0 shadow-none fw-medium text-secondary rounded-end-pill pe-3"
           />
         </div>
       </div>
     </div>
 
     <!-- Data Table Card -->
-    <div class="card border rounded-3 shadow-sm">
-      <div class="table-responsive overflow-visible p-0">
+    <div class="card">
+      <div class="table-responsive rounded-3 border-secondary-subtle">
         <b-table
           :items="formattedItems"
           :fields="fields"
           :per-page="perPage"
           :current-page="currentPage"
           :filter="filter"
+          :busy="isTableLoading"
           hover
           responsive
           striped
-          class="align-middle mb-0 table-hover table-bordered"
+          class="align-middle border-top"
           thead-class="bg-secondary text-uppercase small fw-semibold text-secondary"
         >
+          <template #table-busy>
+            <div class="text-center text-primary my-4 py-3">
+                <!-- Standard HTML Bootstrap Spinner fallback -->
+                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                <span class="fw-medium text-secondary">Loading records...</span>
+            </div>
+          </template>
           <!-- Category Column Slot -->
           <template #cell(category.name)="{ value }">
             <div class="d-flex align-items-center py-1">
@@ -113,12 +121,16 @@
         Showing <strong>{{ startRow }}–{{ endRow }}</strong> of <strong>{{ items.length }}</strong> entries
       </p>
       <BPagination
-        v-model="currentPage"
-        :total-rows="items.length"
-        :per-page="perPage"
-        class="mb-0"
-        first-number
-        last-number
+          v-model="currentPage"
+          :total-rows="transactions.length"
+          :per-page="perPage"
+          align="end"
+          size="sm"
+          class="mb-0 custom-rounded-pagination"
+          first-text="⏮"
+          prev-text="Prev"
+          next-text="Next"
+          last-text="⏭"
       />
     </div>
 
@@ -276,7 +288,8 @@ export default {
         module: String,
         formatters: Object,
         hasView: { type: Boolean, default: false },
-        viewUrl: String
+        viewUrl: String,
+        isTableLoading: { type: Boolean, default: true}
     },
     data() {
         return {

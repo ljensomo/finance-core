@@ -1,6 +1,6 @@
 <template>
     <div class="container-fluid">
-        <div class="card shadow-sm border-1 rounded-3">
+        <div class="card shadow-sm border border-secondary-subtle rounded-4 overflow-hidden">
             <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                 <!-- Left Section: Icon & Title -->
                 <div class="d-flex align-items-center">
@@ -20,6 +20,7 @@
                     :formatters="formatters"
                     @select-item="selectedItem = $event"
                     @reload-table="loadWishlists"
+                    :isTableLoading="isTableLoading"
                 >
                 </DataTable>
             </div>
@@ -37,17 +38,16 @@ export default {
             module: 'wishlist',
             utilityUrl: '/api/wishlists',
             selectedItem: null,
+            isTableLoading: true,
             wishlists: [],
             fields: [
                 { key: 'item', label: 'Item', sortable: true },
-                { key: 'type_label', label: 'Type', sortable: true },
                 { key: 'category_label', label: 'Category', sortable: true },
                 { key: 'priority', label: 'Priority', sortable: true },
                 { key: 'estimated_cost', label: 'Estimated Cost', sortable: true },
                 { key: 'notes', label: 'Notes', sortable: true },
                 { key: 'status', label: 'Status', sortable: true },
                 { key: 'formatted_target_date', label: 'Target Date', sortable: true },
-                { key: 'formatted_created_at', label: 'Date Added', sortable: true },
                 { key: 'actions', label: '' }
             ],
             formFields: [
@@ -165,6 +165,7 @@ export default {
             this.wishlists = await this.fetchRecords({
                 url: '/api/wishlists'
             });
+            this.isTableLoading = false;
         },
         resetSelection() {
             this.selectedItem = {};

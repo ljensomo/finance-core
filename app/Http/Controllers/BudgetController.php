@@ -86,5 +86,11 @@ class BudgetController extends Controller
             ->get();
 
         return response()->json($budgetItems);
-    } 
+    }
+    
+    public function getActiveBudgets(){
+        $budgets = Budget::where('status', 1)->get();
+
+        return response()->json($budgets);
+    }
 }

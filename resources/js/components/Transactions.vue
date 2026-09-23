@@ -718,7 +718,7 @@
                 }
             },
             fetchBudgets(){
-                axios.get('/api/budgets').then(response => {
+                axios.get('/budgets/active').then(response => {
                     this.budgets = response.data;
                 }).catch(error => {
                     console.error('Error fetching budgets:', error);

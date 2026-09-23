@@ -12,6 +12,7 @@ use App\Http\Controllers\GoogleSheetsController;
 use App\Http\Controllers\ImportLogsController;
 use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\BudgetItemController;
+use App\Models\Budget;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Importer;
 
@@ -101,5 +102,6 @@ Route::middleware('auth:web')->group(function(){
 
     // Budget routes
     Route::get('/budgets/comparison/{id}', [BudgetController::class, 'getBudgetItemComparison'])->name('budgets.comparison');
+    Route::get('/budgets/active', [BudgetController::class, 'getActiveBudgets'])->name('budgets.active');
 });
 
