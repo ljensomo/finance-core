@@ -335,8 +335,8 @@
                 filter: ref(''),
                 tableTransition: {
                     name: 'fade',
-                    appear: true,
-                    mode: 'out-in'
+                    type: 'transition',
+                    appear: true
                 },
             }
         },
@@ -447,14 +447,22 @@
 </script>
 
 <style scoped>
-    /* Vue Transition Fade Effect */
+    /* Smooth fade and subtle slide for table rows */
     .fade-enter-active,
-    .fade-leave-active {
-        transition: opacity 0.35s ease-in-out;
+    .fade-leave-active,
+    .fade-move {
+    transition: all 0.3s ease-in-out;
     }
 
     .fade-enter-from,
     .fade-leave-to {
-        opacity: 0;
+    opacity: 0;
+    transform: translateY(-6px);
+    }
+
+    /* Keeps leaving elements from snapping out of flow jarringly */
+    .fade-leave-active {
+    position: absolute;
+    width: 100%;
     }
 </style>

@@ -1,4 +1,5 @@
 <template>
+    <!-- Page Content -->
     <div class="container-fluid">
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -106,22 +107,224 @@
         </div>
 
         <!-- DATA TABLE SECTION -->
-        <div class="card shadow-sm">
-            <div class="card-body border-1 px-4 pb-4">
-                <!-- <DataTable
-                    :items="budgets"
-                    :fields="fields"
-                    :form-fields="formFields"
-                    :utilityUrl="utilityUrl"
-                    :module="module"
-                    :formatters="formatters"
-                    @select-item="selectedItem = $event"
-                    @reload-table="loadBudgets"
-                    @addFunction="resetSelection"
-                    @isEditing="isEdit"
-                /> -->
+        <div class="card shadow-sm border border-secondary-subtle rounded-4 overflow-hidden">
+            <div class="card-body">
+                <div class="row g-3 mb-4 align-items-center">
+                    <div class="col-md-8 d-flex gap-2">
+                        <button class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm" @click="add()">
+                            <i class="fa-solid fa-plus me-2"></i>Add Item
+                        </button>
+                    </div>
+                    <div class="col-md-4 d-flex gap-2 align-items-center">
+                        <!-- Search Input Group -->
+                        <div class="input-group input-group-sm rounded-pill overflow-hidden shadow-sm">
+                            <!-- Icon Prefix (Rounded Start) -->
+                            <span class="input-group-text bg-light border-secondary-subtle border-end-0 text-muted rounded-start-pill ps-3">
+                                <i class="fa-solid fa-magnifying-glass small"></i>
+                            </span>
+
+                            <!-- Search Input (Rounded End) -->
+                            <BFormInput
+                                v-model="filter"
+                                placeholder="Type to Search..."
+                                size="sm"
+                                class="border-secondary-subtle border-start-0 shadow-none fw-medium text-secondary rounded-end-pill pe-3"
+                            />
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive rounded-3 overflow-hidden border border-secondary-subtle">
+                    <BTable
+                        :items="budgets"
+                        :fields="fields"
+                        :filter="filter"
+                        show-empty
+                        hover
+                        class="align-middle border-top"
+                        thead-class="table-light text-uppercase small fw-bold"
+                    >
+                    </BTable>
+                    <div class="d-flex justify-content-between align-items-center mb-0 py-3 px-3">
+                        <p class="mb-0 text-muted small fw-medium">
+                            Showing {{ Number(startRow).toLocaleString() }}–{{ Number(endRow).toLocaleString() }} 
+                                of {{ Number(budgets.length).toLocaleString() }} rows
+                        </p>
+                        <BPagination
+                            v-model="currentPage"
+                            :total-rows="budgets.length"
+                            :per-page="perPage"
+                            align="end"
+                            size="sm"
+                            class="mb-0 custom-rounded-pagination"
+                            first-text="⏮"
+                            prev-text="Prev"
+                            next-text="Next"
+                            last-text="⏭"
+                        />
+                    </div>
+                </div>
             </div>
         </div>
+    </div>
+
+    <!-- Canvas -->
+    <div class="offcanvas offcanvas-end border-0 shadow-lg" tabindex="-1" id="budgetCanvas" style="width: 500px;">
+        <!-- Drawer Header -->
+        <div class="offcanvas-header border-bottom py-3 px-4 bg-body-tertiary">
+            <div class="d-flex align-items-center gap-3">
+                <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                    <i class="fa-solid fa-pen-to-square fs-5"></i>
+                </div>
+                <div>
+                    <h5 class="offcanvas-title fw-bold text-dark mb-0" id="budgetCanvasLabel">
+                        {{ form.id ? 'Edit' : 'Create' }} Item
+                    </h5>
+                    <p class="text-muted small mb-0">Fill in the details below to save your budget item.</p>
+                </div>
+            </div>
+            <button type="button" class="btn-close shadow-none" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+
+        <!-- Form & Body Structure -->
+        <form @submit.prevent="submitForm" novalidate class="d-flex flex-column h-100 mb-0 overflow-hidden">
+            
+            <!-- Scrollable Body Container -->
+            <div class="offcanvas-body p-4 flex-grow-1" style="overflow-y: auto; min-height: 0;">
+                
+                <!-- Section 1: Basic Details -->
+                <div class="mb-4">
+                    <label class="form-label text-uppercase text-secondary fw-bold fs-7 mb-2">Item Information</label>
+                    
+                    <!-- Title Field -->
+                    <div class="mb-3">
+                        <label for="item_title" class="form-label small fw-semibold text-dark mb-1">
+                            Title <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-muted border-end-0">
+                                <i class="fa-solid fa-heading small"></i>
+                            </span>
+                            <input 
+                                type="text" 
+                                class="form-control border-start-0 shadow-none" 
+                                id="item_title" 
+                                placeholder="e.g. Office Supplies, Marketing Campaign" 
+                                v-model="form.title" 
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Category Field -->
+                    <div class="mb-3">
+                        <label for="item_category" class="form-label small fw-semibold text-dark mb-1">
+                            Category <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-muted border-end-0">
+                                <i class="fa-solid fa-layer-group small"></i>
+                            </span>
+                            <select 
+    class="form-select border-start-0 shadow-none text-secondary" 
+    id="item_category" 
+    v-model="form.category" 
+    required
+>
+    <option value="" disabled selected>Select a category...</option>
+    <option 
+        v-for="category in categories" 
+        :key="category.id || category" 
+        :value="category.value || category"
+    >
+        {{ category.name }}
+    </option>
+</select>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4 text-muted opacity-25" />
+
+                <!-- Section 2: Budget Allocation -->
+                <div class="mb-4">
+                    <label class="form-label text-uppercase text-secondary fw-bold fs-7 mb-2">Allocation & Metadata</label>
+
+                    <!-- Budget Amount Field with Currency Prefix -->
+                    <div class="mb-3">
+                        <label for="item_budget_amount" class="form-label small fw-semibold text-dark mb-1">
+                            Budget Amount <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light fw-bold text-dark border-end-0">₱</span>
+                            <input 
+                                type="number" 
+                                step="0.01" 
+                                class="form-control border-start-0 font-monospace fs-6 shadow-none" 
+                                id="item_budget_amount" 
+                                placeholder="0.00" 
+                                v-model="form.budget_amount" 
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Tag Field -->
+                    <div class="mb-3">
+                        <label for="item_tag" class="form-label small fw-semibold text-dark mb-1">
+                            Tag <span class="text-muted fw-normal">(Optional)</span>
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-muted border-end-0">
+                                <i class="fa-solid fa-tag small"></i>
+                            </span>
+                            <input 
+                                type="text" 
+                                class="form-control border-start-0 shadow-none" 
+                                id="item_tag" 
+                                placeholder="e.g. Monthly, Priority, Q3" 
+                                v-model="form.tag"
+                            >
+                        </div>
+                        <!-- Live Tag Preview Badge -->
+                        <div v-if="form.tag" class="mt-2">
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill">
+                                <i class="fa-solid fa-hashtag me-1"></i>{{ form.tag }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Description Field -->
+                    <div>
+                        <label for="item_description" class="form-label small fw-semibold text-dark mb-1">
+                            Description <span class="text-muted fw-normal">(Optional)</span>
+                        </label>
+                        <textarea 
+                            class="form-control shadow-none p-2.5" 
+                            id="item_description" 
+                            rows="3" 
+                            placeholder="Add notes, justification, or additional details..." 
+                            v-model="form.description"
+                        ></textarea>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Fixed Footer Actions -->
+            <div class="offcanvas-footer p-3 border-top bg-body-tertiary d-flex align-items-center justify-content-end gap-2 flex-shrink-0">
+                <button 
+                    type="button" 
+                    class="btn btn-outline-secondary rounded-pill px-4 fw-semibold border-0" 
+                    data-bs-dismiss="offcanvas"
+                >
+                    Cancel
+                </button>
+                <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-check"></i>
+                    <span>{{ form.id ? 'Update Item' : 'Save Item' }}</span>
+                </button>
+            </div>
+        </form>
     </div>
 
     <ModalForm
@@ -139,6 +342,7 @@
     import {
             Chart,Title,Tooltip,Legend,ArcElement,DoughnutController,LineController,LogarithmicScale,LineElement,BarElement,
         } from "chart.js";
+    import { ref } from 'vue';
 
     Chart.register(
         Title,
@@ -200,7 +404,18 @@
                         value: val ? '#'+val : '-',
                         class: 'font-monospace text-secondary fst-italic'
                     })
-                }
+                },
+                form:{
+                    id: null,
+                    title: null,
+                    category: null,
+                    description: null,
+                    amount: null
+                },
+                perPage: ref(10),
+                currentPage: ref(1),
+                rows: ref(0),
+                filter: ref(''),
             }
         },
         watch:{
@@ -210,6 +425,19 @@
             totalActual(newValue, oldValue){
                 this.animateCount('animatedTotalExpenses', oldValue || 0, newValue, 1500);
             }
+        },
+        computed: {
+            paginatedItems() {
+                const start = (this.currentPage - 1) * this.perPage.value;
+                const end = start + this.perPage.value;
+                return this.budgets.slice(start, end);
+            },
+            startRow() {
+                return this.budgets.length === 0 ? 0 : (this.currentPage - 1) * this.perPage + 1;
+            },
+            endRow() {
+                return Math.min(this.currentPage * this.perPage, this.budgets.length)
+            },
         },
         methods: {
             async loadBudgets(){
@@ -335,7 +563,7 @@
                                 }
                             },
                             y: {
-                                type: 'linear', // <--- Key change: logarithmic scale
+                                type: 'logarithmic', // <--- Key change: logarithmic scale
                                 grid: { color: '#f1f5f9' },
                                 ticks: {
                                     color: '#64748b',
@@ -374,6 +602,17 @@
                 
                 requestAnimationFrame(step);
             },
+            add(){
+                this.isEditing = false;
+                this.form = {
+                    id: null,
+                    title: null,
+                    category: null,
+                    description: null,
+                    amount: null
+                }
+                this.openModal('budgetCanvas');
+            }
         },
         async mounted(){
             this.budget = await this.fetchItem({ url: '/api/budgets/'+this.$route.query.id });
