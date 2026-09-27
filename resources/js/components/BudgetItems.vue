@@ -209,7 +209,7 @@
                                 class="form-control border-start-0 shadow-none" 
                                 id="item_title" 
                                 placeholder="e.g. Office Supplies, Marketing Campaign" 
-                                v-model="form.title" 
+                                v-model="form.item_name" 
                                 required
                             >
                         </div>
@@ -217,28 +217,21 @@
 
                     <!-- Category Field -->
                     <div class="mb-3">
-                        <label for="item_category" class="form-label small fw-semibold text-dark mb-1">
+                        <label class="form-label small fw-semibold text-dark mb-1">
                             Category <span class="text-danger">*</span>
                         </label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light text-muted border-end-0">
-                                <i class="fa-solid fa-layer-group small"></i>
-                            </span>
-                            <select 
-    class="form-select border-start-0 shadow-none text-secondary" 
-    id="item_category" 
-    v-model="form.category" 
-    required
->
-    <option value="" disabled selected>Select a category...</option>
-    <option 
-        v-for="category in categories" 
-        :key="category.id || category" 
-        :value="category.value || category"
-    >
-        {{ category.name }}
-    </option>
-</select>
+                        <div class="d-flex flex-wrap gap-2">
+                            <button 
+                                type="button"
+                                v-for="cat in categories" 
+                                :key="cat.id || cat"
+                                class="btn btn-sm rounded-pill d-flex align-items-center gap-1.5 transition-all"
+                                :class="form.category_id === (cat.id || cat) ? 'btn-primary shadow-sm' : 'btn-outline-secondary border-opacity-50'"
+                                @click="form.category_id = (cat.id || cat)"
+                            >
+                                <i v-if="cat.icon" :class="cat.icon" class="small"></i>
+                                <span>{{ cat.name || cat }}</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -262,16 +255,16 @@
                                 class="form-control border-start-0 font-monospace fs-6 shadow-none" 
                                 id="item_budget_amount" 
                                 placeholder="0.00" 
-                                v-model="form.budget_amount" 
+                                v-model="form.amount" 
                                 required
                             >
                         </div>
                     </div>
 
-                    <!-- Tag Field -->
+                    <!-- Tag Field (Readonly - Inline Badge) -->
                     <div class="mb-3">
                         <label for="item_tag" class="form-label small fw-semibold text-dark mb-1">
-                            Tag <span class="text-muted fw-normal">(Optional)</span>
+                            Tag <span class="text-muted fw-normal">(Auto-generated)</span>
                         </label>
                         <div class="input-group">
                             <span class="input-group-text bg-light text-muted border-end-0">
@@ -279,16 +272,17 @@
                             </span>
                             <input 
                                 type="text" 
-                                class="form-control border-start-0 shadow-none" 
+                                class="form-control border-start-0 border-end-0 shadow-none bg-light text-muted" 
                                 id="item_tag" 
-                                placeholder="e.g. Monthly, Priority, Q3" 
+                                placeholder="auto_generated_tag" 
                                 v-model="form.tag"
+                                readonly
                             >
-                        </div>
-                        <!-- Live Tag Preview Badge -->
-                        <div v-if="form.tag" class="mt-2">
-                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill">
-                                <i class="fa-solid fa-hashtag me-1"></i>{{ form.tag }}
+                            <!-- Inline Tag Badge Container -->
+                            <span class="input-group-text bg-light border-start-0 ps-0">
+                                <span v-if="form.tag" class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill">
+                                    <i class="fa-solid fa-hashtag me-1"></i>{{ form.tag }}
+                                </span>
                             </span>
                         </div>
                     </div>
@@ -406,9 +400,10 @@
                     })
                 },
                 form:{
+                    budget_id:this.$route.query.id,
                     id: null,
-                    title: null,
-                    category: null,
+                    item_name: null,
+                    category_id: null,
                     description: null,
                     amount: null
                 },
@@ -424,6 +419,17 @@
             },
             totalActual(newValue, oldValue){
                 this.animateCount('animatedTotalExpenses', oldValue || 0, newValue, 1500);
+            },
+            'form.item_name': function (newTitle) {
+                if (newTitle) {
+                    this.form.tag = newTitle
+                    .trim()
+                    .toLowerCase()
+                    .replace(/[\s\W]+/g, '_')
+                    .replace(/^_+|_+$/g, '');
+                } else {
+                    this.form.tag = '';
+                }
             }
         },
         computed: {
@@ -605,13 +611,32 @@
             add(){
                 this.isEditing = false;
                 this.form = {
+                    budget_id: this.$route.query.id,
                     id: null,
-                    title: null,
-                    category: null,
+                    item_name: null,
+                    category_id: null,
                     description: null,
                     amount: null
                 }
                 this.openModal('budgetCanvas');
+            },
+            submitForm(e){
+                e.preventDefault();
+
+                this.saveItem({
+                    url: this.isEditing ? `/api/budget-items/${this.form.id}` : '/api/budget-items',
+                    method: this.isEditing ? 'put' : 'post',
+                    data: this.form,
+                    successMessage: this.isEditing ? 'Item updated successfully!' : 'Item saved successfully!',
+                    errorMessage: this.isEditing ? 'Failed to update item.' : 'Failed to save item.',
+                    callback: () => {
+                        e.target.reset();
+                        this.loadBudgets();
+                        this.closeModal('budgetCanvas');
+
+                        this.fetchBudgetItemComparison();
+                    }
+                })
             }
         },
         async mounted(){
