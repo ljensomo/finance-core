@@ -141,8 +141,57 @@
                         show-empty
                         hover
                         class="align-middle border-top"
+                        striped
                         thead-class="table-light text-uppercase small fw-bold"
                     >
+
+                        <!-- Custom Cell Template for Budget Amount -->
+                        <template #cell(amount)="{ item }">
+                            <div class="d-inline-block px-3 py-1 rounded-pill fw-semibold text-end font-monospace bg-primary bg-opacity-10 text-primary">
+                                {{ formatPeso(item.amount ?? 0) }}
+                            </div>
+                        </template>
+
+                        <!-- Custom Cell Template for Tag -->
+                        <template #cell(tag)="{ value }">
+                            <span 
+                                v-if="value" 
+                                class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill fw-medium font-monospace px-2.5 py-1"
+                            >
+                                <i class="fa-solid fa-hashtag me-1 opacity-75"></i>{{ value }}
+                            </span>
+                            <span v-else class="text-muted opacity-50 small">&mdash;</span>
+                        </template>
+
+                        <!-- Custom Cell Template for Description -->
+                        <template #cell(description)="{ value }">
+                            <div v-if="value" class="description-content text-muted" v-html="value"></div>
+                            <span v-else class="text-muted fst-italic small">No description provided</span>
+                        </template>
+
+                        <template #cell(actions)="row">
+                            <div class="d-flex gap-1">
+                                <BButton 
+                                    size="sm" 
+                                    variant="light" 
+                                    class="btn-icon rounded-circle bg-warning-subtle border-warning-subtle text-warning-emphasis shadow-sm px-2 py-1" 
+                                    @click="edit(row.item.id)"
+                                    title="Edit Transaction"
+                                >
+                                    <i class="fa-solid fa-pen-to-square small"></i>
+                                </BButton>
+
+                                <BButton 
+                                    size="sm" 
+                                    variant="danger" 
+                                    class="btn-icon rounded-circle bg-danger-subtle border-danger-subtle text-danger-emphasis shadow-sm px-2 py-1" 
+                                    @click="remove(row.item.id)"
+                                    title="Delete Transaction"
+                                >
+                                    <i class="fa-solid fa-trash small"></i>
+                                </BButton>
+                            </div>
+                        </template>
                     </BTable>
                     <div class="d-flex justify-content-between align-items-center mb-0 py-3 px-3">
                         <p class="mb-0 text-muted small fw-medium">
@@ -202,7 +251,7 @@
                         </label>
                         <div class="input-group">
                             <span class="input-group-text bg-light text-muted border-end-0">
-                                <i class="fa-solid fa-heading small"></i>
+                                <i class="fa-solid fa-font small"></i>
                             </span>
                             <input 
                                 type="text" 
@@ -288,17 +337,41 @@
                     </div>
 
                     <!-- Description Field -->
-                    <div>
-                        <label for="item_description" class="form-label small fw-semibold text-dark mb-1">
+                    <div class="mb-4">
+                        <label class="form-label small fw-semibold text-dark mb-2">
                             Description <span class="text-muted fw-normal">(Optional)</span>
                         </label>
-                        <textarea 
-                            class="form-control shadow-none p-2.5" 
-                            id="item_description" 
-                            rows="3" 
-                            placeholder="Add notes, justification, or additional details..." 
-                            v-model="form.description"
-                        ></textarea>
+                        
+                        <div class="wysiwyg-wrapper border rounded-3 overflow-hidden bg-white">
+                            <!-- Toolbar -->
+                            <div class="wysiwyg-toolbar bg-light border-bottom p-1.5 d-flex gap-1 flex-wrap align-items-center">
+                                <button type="button" class="btn btn-sm btn-light border-0 px-2 py-1 text-secondary" @click="formatText('bold')" title="Bold">
+                                    <i class="fa-solid fa-bold"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-light border-0 px-2 py-1 text-secondary" @click="formatText('italic')" title="Italic">
+                                    <i class="fa-solid fa-italic"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-light border-0 px-2 py-1 text-secondary" @click="formatText('underline')" title="Underline">
+                                    <i class="fa-solid fa-underline"></i>
+                                </button>
+                                <div class="vr my-1 opacity-25"></div>
+                                <button type="button" class="btn btn-sm btn-light border-0 px-2 py-1 text-secondary" @click="formatText('insertUnorderedList')" title="Bullet List">
+                                    <i class="fa-solid fa-list-ul"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-light border-0 px-2 py-1 text-secondary" @click="formatText('insertOrderedList')" title="Numbered List">
+                                    <i class="fa-solid fa-list-ol"></i>
+                                </button>
+                            </div>
+                            
+                            <!-- Editable Content Area -->
+                            <div 
+                                class="wysiwyg-editor p-3 text-dark fs-7" 
+                                contenteditable="true" 
+                                style="min-height: 90px; outline: none; overflow-y: auto;"
+                                ref="wysiwygEditor"
+                                @input="updateDescription"
+                            ></div>
+                        </div>
                     </div>
                 </div>
 
@@ -320,15 +393,6 @@
             </div>
         </form>
     </div>
-
-    <ModalForm
-        :module="module"
-        :formFields="formFields"
-        :utilityUrl="utilityUrl"
-        :selected-item="selectedItem"
-        @reload-table="loadBudgets"
-    >
-    </ModalForm>
 </template>
 <script>
     import DataTable from './Shared/DataTable.vue';
@@ -618,7 +682,27 @@
                     description: null,
                     amount: null
                 }
+                if (this.$refs.wysiwygEditor) {
+                    this.$refs.wysiwygEditor.innerHTML = null;
+                }
                 this.openModal('budgetCanvas');
+            },
+            edit(id){
+                this.fetchItem({
+                    url: `/api/budget-items/${id}`,
+                    errorMessage: 'Failed to retrieve item details.',
+                    callback: (response) => {
+                        // set form data
+                        this.form = response;
+                        if (this.$refs.wysiwygEditor) {
+                           this.$refs.wysiwygEditor.innerHTML = this.form.description;
+                        }
+
+
+                        this.isEditing = true;
+                        this.openModal('budgetCanvas');
+                    }
+                });
             },
             submitForm(e){
                 e.preventDefault();
@@ -637,7 +721,15 @@
                         this.fetchBudgetItemComparison();
                     }
                 })
-            }
+            },
+            // WYSIWYG helper functions
+            formatText(command) {
+                document.execCommand(command, false, null);
+                this.updateDescription();
+            },
+            updateDescription() {
+                this.form.description = this.$refs.wysiwygEditor.innerHTML;
+            },
         },
         async mounted(){
             this.budget = await this.fetchItem({ url: '/api/budgets/'+this.$route.query.id });
