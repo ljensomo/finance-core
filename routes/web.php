@@ -103,5 +103,6 @@ Route::middleware('auth:web')->group(function(){
     // Budget routes
     Route::get('/budgets/comparison/{id}', [BudgetController::class, 'getBudgetItemComparison'])->name('budgets.comparison');
     Route::get('/budgets/active', [BudgetController::class, 'getActiveBudgets'])->name('budgets.active');
+    Route::get('/budgets/last-month', [BudgetController::class, 'getLastMonthTotalBudget'])->name('budgets.lastMonth');
 });
 

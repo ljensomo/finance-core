@@ -75,30 +75,47 @@
             <!-- Stats Column -->
             <div class="col-12 col-lg-4 d-flex flex-column gap-3">
                 
-                <!-- Total Amount Card -->
-                <div class="card border-1 shadow-sm rounded-3 flex-fill stat-card-success">
+                <!-- Total Budget Amount Card -->
+                <div class="card border-1 shadow-sm rounded-3 flex-fill">
                     <div class="card-body d-flex align-items-center justify-content-between p-4">
-                        <div>
-                            <span class="fw-bold text-uppercase small text-muted">Total Budget Amount</span>
-                            <h3 class="fw-bold text-emerald mb-1 mt-1">{{ formatPeso(animatedTotalBudget) }}</h3>
-                            <span class="badge bg-success-subtle text-success rounded-pill px-2 py-1">+12% from last month</span>
+                        <!-- Left Content -->
+                        <div class="ms-3">
+                            <span class="fw-bold text-uppercase small text-muted d-block mb-1">Total Budget Amount</span>
+                            <h3 class="fw-bold text-dark mb-1">{{ formatPeso(animatedTotalBudget) }}</h3>
+
+                            <!-- Skeleton Loader (Shows while loading OR before trend is calculated) -->
+                            <div v-if="isChartLoading || !budgetTrend" class="placeholder-glow mt-1">
+                                <span class="placeholder col-6 rounded-pill bg-secondary bg-opacity-25 py-2"></span>
+                            </div>
+
+                            <!-- Actual Content (Only renders once fully calculated) -->
+                            <span v-else :class="['badge', budgetTrend.isPositive ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger', 'rounded-pill px-2 py-1']">
+                                <i :class="[budgetTrend.iconClass, 'me-1']"></i>{{ budgetTrend.text }}
+                            </span>
                         </div>
-                        <div class="stat-icon bg-emerald-subtle text-emerald rounded-circle">
-                            <i class="bi bi-wallet2 fs-4"></i>
+
+                        <!-- Right Icon Container (Font Awesome + Pure Bootstrap) -->
+                        <div class="bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 82px; height: 82px;">
+                            <i class="fa-solid fa-wallet fs-4"></i>
                         </div>
                     </div>
                 </div>
 
                 <!-- Total Expense Card -->
-                <div class="card border-1 shadow-sm rounded-3 flex-fill stat-card-danger">
+                <div class="card border-1 shadow-sm rounded-3 flex-fill">
                     <div class="card-body d-flex align-items-center justify-content-between p-4">
-                        <div>
-                            <span class="fw-bold text-uppercase small text-muted">Total Expenses this month</span>
-                            <h3 class="fw-bold text-rose mb-1 mt-1">{{ formatPeso(animatedTotalExpenses) }}</h3>
-                            <span class="badge bg-danger-subtle text-danger rounded-pill px-2 py-1">+5% from last month</span>
+                        <!-- Left Content -->
+                        <div class="ms-3">
+                            <span class="fw-bold text-uppercase small text-muted d-block mb-1">Total Expenses this month</span>
+                            <h3 class="fw-bold text-dark mb-1">{{ formatPeso(animatedTotalExpenses) }}</h3>
+                            <span class="badge bg-danger-subtle text-danger rounded-pill px-2 py-1">
+                                <i class="fa-solid fa-arrow-trend-up me-1"></i>+5% from last month
+                            </span>
                         </div>
-                        <div class="stat-icon bg-rose-subtle text-rose rounded-circle">
-                            <i class="bi bi-credit-card fs-4"></i>
+
+                        <!-- Right Icon Container (Font Awesome + Pure Bootstrap) -->
+                        <div class="bg-danger-subtle text-danger rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 82px; height: 82px;">
+                            <i class="fa-solid fa-credit-card fs-4"></i>
                         </div>
                     </div>
                 </div>
@@ -434,6 +451,7 @@
                 animatedTotalBudget: 0,
                 totalActual: 0,
                 animatedTotalExpenses: 0,
+                lastMonthTotalBudget: 0,
                 fields: [
                     { key: 'item_name', label: 'Title', sortable: true },
                     { key: 'category.name', label: 'Category', sortable: true },
@@ -494,7 +512,7 @@
                 } else {
                     this.form.tag = '';
                 }
-            }
+            },
         },
         computed: {
             paginatedItems() {
@@ -508,6 +526,33 @@
             endRow() {
                 return Math.min(this.currentPage * this.perPage, this.budgets.length)
             },
+            budgetTrend() {
+                // Return null if data is still loading to prevent false calculations
+                if (this.isChartLoading) {
+                    return null;
+                }
+
+                const current = Number(this.totalBudget) || 0;
+                const previous = Number(this.lastMonthTotalBudget) || 0;
+
+                if (previous === 0) {
+                    return {
+                        isPositive: current >= 0,
+                        iconClass: current > 0 ? 'fa-solid fa-arrow-trend-up' : 'fa-solid fa-minus',
+                        text: current > 0 ? '+100% from last month' : '0% from last month'
+                    };
+                }
+
+                const percentageChange = ((current - previous) / previous) * 100;
+                const isPositive = percentageChange >= 0;
+                const formattedPercentage = Math.abs(percentageChange).toFixed(0);
+
+                return {
+                    isPositive: isPositive,
+                    iconClass: isPositive ? 'fa-solid fa-arrow-trend-up' : 'fa-solid fa-arrow-trend-down',
+                    text: `${isPositive ? '+' : '-'}${formattedPercentage}% from last month`
+                };
+            }
         },
         methods: {
             async loadBudgets(){
@@ -532,6 +577,8 @@
                     // Calculate Totals
                     this.totalBudget = this.tags.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
                     this.totalActual = this.tags.reduce((sum, item) => sum + (parseFloat(item.actual) || 0), 0);
+
+                    this.getLastMonthBudget();
                     
                     const chartData = {
                         labels: this.tags.map(item => item.item_name),
@@ -543,6 +590,14 @@
                 }).catch(error => {
                     console.error('Error fetching tags:', error);
                 });
+            },
+            getLastMonthBudget(){
+                this.fetchItem({
+                    url: `/budgets/last-month`,
+                    callback: (response) => {
+                        this.lastMonthTotalBudget = response.total_budget;
+                    }
+                })
             },
             renderChart(data) {
                 const canvas = document.getElementById('budgetChart');
@@ -718,6 +773,17 @@
                         this.loadBudgets();
                         this.closeModal('budgetCanvas');
 
+                        this.fetchBudgetItemComparison();
+                    }
+                })
+            },
+            remove(id){
+                this.deleteItem({
+                    url: `/api/budget-items/${id}`,
+                    successMessage: 'Item deleted successfully.',
+                    errorMessage: 'Failed to delete item.',
+                    callback: () => {
+                        this.loadBudgets();
                         this.fetchBudgetItemComparison();
                     }
                 })

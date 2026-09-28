@@ -8,6 +8,7 @@ use App\Models\BudgetItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class BudgetController extends Controller
 {
@@ -92,5 +93,26 @@ class BudgetController extends Controller
         $budgets = Budget::where('status', 1)->get();
 
         return response()->json($budgets);
+    }
+
+    /**
+     * Get the total budget amount for last month.
+     */
+    public function getLastMonthTotalBudget(){
+        $startOfLastMonth = Carbon::now()->subMonth()->startOfMonth()->toDateString();
+        $endOfLastMonth = Carbon::now()->subMonth()->endOfMonth()->toDateString();
+
+        $totalBudget = Budget::where('user_id', Auth::id())
+            ->where(function($query) use ($startOfLastMonth, $endOfLastMonth) {
+                $query->whereBetween('start_date', [$startOfLastMonth, $endOfLastMonth])
+                      ->orWhereBetween('end_date', [$startOfLastMonth, $endOfLastMonth]);
+            })
+            ->withSum('budgetItems as total_amount', 'amount')
+            ->get()
+            ->sum('total_amount');
+
+        return response()->json([
+            'total_budget' => (float) $totalBudget
+        ]);
     }
 }
