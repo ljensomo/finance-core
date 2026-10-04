@@ -99,7 +99,7 @@
                                     variant="light" 
                                     class="btn-icon rounded-circle bg-warning-subtle border-warning-subtle text-warning-emphasis shadow-sm px-2 py-1" 
                                     @click="edit(row.item)"
-                                    title="Edit Transaction"
+                                    title="Edit Category"
                                 >
                                     <i class="fa-solid fa-pen-to-square small"></i>
                                 </BButton>
@@ -109,7 +109,7 @@
                                     variant="danger" 
                                     class="btn-icon rounded-circle bg-danger-subtle border-danger-subtle text-danger-emphasis shadow-sm px-2 py-1" 
                                     @click="remove(row.item)"
-                                    title="Delete Transaction"
+                                    title="Delete Category"
                                 >
                                     <i class="fa-solid fa-trash small"></i>
                                 </BButton>

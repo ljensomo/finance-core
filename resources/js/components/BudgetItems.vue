@@ -177,6 +177,7 @@
                         :filter="filter"
                         show-empty
                         hover
+                        small
                         class="align-middle border-top"
                         striped
                         thead-class="table-light text-uppercase small fw-bold"
@@ -188,6 +189,29 @@
                                 {{ formatPeso(item.amount ?? 0) }}
                             </div>
                         </template>
+
+                        <!-- Category Name -->
+                        <template #cell(category.name)="row">
+                            <div class="d-flex align-items-center" v-if="row.item.category">
+                                <!-- Dynamic Category Icon Circle -->
+                                <div 
+                                    class="category-icon-sm me-2 d-flex align-items-center justify-content-center rounded-circle text-white shadow-sm flex-shrink-0"
+                                    :style="{ 
+                                        backgroundColor: row.item.category.color || '#6c757d', 
+                                        width: '32px', 
+                                        height: '32px' 
+                                    }"
+                                >
+                                    <i :class="row.item.category.icon || 'fa-solid fa-tag'" class="small"></i>
+                                </div>
+                                
+                                <!-- Category Name -->
+                                <span class="fw-medium text-dark">{{ row.item.category.name }}</span>
+                            </div>
+
+                            <!-- Fallback if Transaction has no assigned category -->
+                            <span v-else class="text-muted fst-italic">Uncategorized</span>
+                        </template>                        
 
                         <!-- Custom Cell Template for Tag -->
                         <template #cell(tag)="{ value }">
@@ -213,7 +237,7 @@
                                     variant="light" 
                                     class="btn-icon rounded-circle bg-warning-subtle border-warning-subtle text-warning-emphasis shadow-sm px-2 py-1" 
                                     @click="edit(row.item.id)"
-                                    title="Edit Transaction"
+                                    title="Edit Item"
                                 >
                                     <i class="fa-solid fa-pen-to-square small"></i>
                                 </BButton>
@@ -223,7 +247,7 @@
                                     variant="danger" 
                                     class="btn-icon rounded-circle bg-danger-subtle border-danger-subtle text-danger-emphasis shadow-sm px-2 py-1" 
                                     @click="remove(row.item.id)"
-                                    title="Delete Transaction"
+                                    title="Delete Item"
                                 >
                                     <i class="fa-solid fa-trash small"></i>
                                 </BButton>
