@@ -13,6 +13,7 @@ import { Helpers } from './methods/helpers.js';
 import 'sweetalert2/dist/sweetalert2.min.css';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue-next/dist/bootstrap-vue-next.css';
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 const app = createApp({});
 

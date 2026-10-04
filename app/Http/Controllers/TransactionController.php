@@ -40,18 +40,24 @@ class TransactionController extends Controller
      */
     public function store(Request $request)
     {
-        $transaction = new Transaction();
-        $transaction->user_id = Auth::id();
-        $transaction->type = $request->input('type');
-        $transaction->amount = $request->input('amount');
-        $transaction->date = $request->input('date');
-        $transaction->description = $request->input('description');
-        $transaction->category_id = $request->input('category_id');
-        $transaction->budget_id = $request->input('budget_id');
-        $transaction->budget_item_id = $request->input('budget_item_id');
-        $transaction->save();
+       // Validate required fields and formats
+        $validated = $request->validate([
+            'type'           => ['required'],
+            'amount'         => ['required', 'numeric', 'gt:0'],
+            'date'           => ['required', 'date'],
+            'description'    => ['nullable', 'string'],
+            'category_id'    => ['required'],
+            'budget_id'      => ['nullable'],
+            'budget_item_id' => ['nullable'],
+        ]);
 
-        return response()->json($transaction);
+        // Merge the authenticated user ID into the validated array
+        $validated['user_id'] = Auth::id();
+
+        // Create the transaction using mass assignment
+        $transaction = Transaction::create($validated);
+
+        return response()->json($transaction, 201);
     }
 
     /**

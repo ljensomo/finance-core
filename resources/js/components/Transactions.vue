@@ -211,6 +211,7 @@
                                 :filter="filter"
                                 :busy="isTableLoading"
                                 striped
+                                small
                                 hover
                                 class="align-middle border-top"
                                 thead-class="table-light text-uppercase small fw-bold"
@@ -231,25 +232,51 @@
                                     </span>
                                 </template>
 
+                                <!-- Category Name -->
                                 <template #cell(category.name)="row">
-                                    <div class="d-flex align-items-center">
-                                        <div class="category-icon-sm me-2 d-flex align-items-center justify-content-center rounded-circle"
-                                            :class="getCategoryStyle(row.item.category.name).colorClass"
+                                    <div class="d-flex align-items-center" v-if="row.item.category">
+                                        <!-- Dynamic Category Icon Circle -->
+                                        <div 
+                                            class="category-icon-sm me-2 d-flex align-items-center justify-content-center rounded-circle text-white shadow-sm flex-shrink-0"
+                                            :style="{ 
+                                                backgroundColor: row.item.category.color || '#6c757d', 
+                                                width: '32px', 
+                                                height: '32px' 
+                                            }"
                                         >
-                                        <i :class="getCategoryStyle(row.item.category.name).icon"></i>
+                                            <i :class="row.item.category.icon || 'fa-solid fa-tag'" class="small"></i>
                                         </div>
-                                        <span class="fw-medium text-secondary">{{ row.item.category.name }}</span>
+                                        
+                                        <!-- Category Name -->
+                                        <span class="fw-medium text-dark">{{ row.item.category.name }}</span>
                                     </div>
+
+                                    <!-- Fallback if Transaction has no assigned category -->
+                                    <span v-else class="text-muted fst-italic">Uncategorized</span>
                                 </template>
 
+                                <!-- Budget Source -->
                                 <template #cell(budget.budget_name)="row">
-                                    <span :class="[
-                                        'badge rounded-pill px-3',
-                                        row.item.budget ? 'bg-primary-subtle text-primary border border-primary-subtle' : 'bg-light text-muted border'
-                                    ]">
-                                        <i class="fa-solid" :class="row.item.budget ? 'fa-wallet me-1' : 'fa-circle-question me-1'"></i>
-                                        {{ row.item.budget ? row.item.budget.budget_name : 'Unallocated' }}
-                                    </span>
+                                    <!-- Income Transaction (No budget allocation applies) -->
+                                    <template v-if="row.item.type === 1 || row.item.category?.type === 1">
+                                        <span class="badge rounded-pill px-3 py-1 fw-medium bg-success-subtle text-success border border-success-subtle">
+                                            <i class="fa-solid fa-hand-holding-dollar me-1"></i>
+                                            Income Source
+                                        </span>
+                                    </template>
+
+                                    <!-- Expense Transaction (Budget validation & display) -->
+                                    <template v-else>
+                                        <span :class="[
+                                            'badge rounded-pill px-3 py-1 fw-medium',
+                                            row.item.budget 
+                                                ? 'bg-primary-subtle text-primary border border-primary-subtle' 
+                                                : 'bg-light text-muted border'
+                                        ]">
+                                            <i class="fa-solid" :class="row.item.budget ? 'fa-wallet me-1' : 'fa-circle-question me-1'"></i>
+                                            {{ row.item.budget ? row.item.budget.budget_name : 'Unallocated' }}
+                                        </span>
+                                    </template>
                                 </template>
 
                                 <template #cell(budget_item.tag)="row">
@@ -569,7 +596,7 @@
                 tags: [],
                 form: {
                     id: null,
-                    type: null,
+                    type: 2,
                     date: null,
                     description: '',
                     amount: null,

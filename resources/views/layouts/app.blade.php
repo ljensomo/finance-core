@@ -17,7 +17,6 @@
     <!-- Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="icon" href="{{ asset('finance_core_logo.png') }}" type="image/png">
     <style>
         .sub-item {
@@ -75,7 +74,7 @@
 
         .sub-item:hover {
             opacity: 1;
-            background: transparent !important; /* Keep it clean */
+            background: transparent !important;
             color: #0d6efd;
         }
 
@@ -96,10 +95,10 @@
 
 <body>
     <div id="app">
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm fixed-top">
+        <nav class="navbar navbar-expand-lg navbar-dark shadow-sm fixed-top" style="    background: linear-gradient(135deg, rgb(21 63 123) 0%, rgb(103 127 161) 100%) !important;">
             <div class="container-fluid">
                 <a class="navbar-brand ms-lg-4 fw-bold text-white" href="{{ url('/') }}">
-                    {{ config('app.name', 'Laravel') }}
+                    {{ config('app.name', 'Finance Core') }}
                 </a>
 
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText"
@@ -215,7 +214,7 @@
                                 <i class="fas fa-chevron-right small transition-all"></i>
                             </a>
                             <ul class="collapse list-unstyled ps-4 mt-1" id="settingsSubmenu">
-                                <li><a class="nav-link py-1 text-dark-emphasis" href="categories"><i class="fa-solid fa-bars me-2 tiny-icon"></i> {{ __('Categories') }}</a></li>
+                                <li><a class="nav-link py-1 text-dark-emphasis" href="categories"><i class="fa-solid fa-tags me-2 tiny-icon"></i> {{ __('Categories') }}</a></li>
                                 <li><a class="nav-link py-1 text-dark-emphasis" href="sub-categories"><i class="fa-solid fa-bars me-2 tiny-icon"></i> {{ __('Sub Categories') }}</a></li>
                             </ul>
                         </li>

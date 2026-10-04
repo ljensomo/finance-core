@@ -44,6 +44,7 @@
                         :filter="filter"
                         :busy="isTableLoading"
                         hover
+                        small
                         class="align-middle border-top"
                         thead-class="table-light text-uppercase small fw-bold"
                         :tbody-tr-class="getRowClass"

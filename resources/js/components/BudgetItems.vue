@@ -31,8 +31,26 @@
             <!-- Chart Column -->
             <div class="col-12 col-lg-8">
                 <div class="card border-1 shadow-sm rounded-3 h-100">
-                    <div class="card-header bg-transparent border-0 pt-4 px-4">
+                    <div class="card-header bg-transparent border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
                         <h6 class="fw-bold text-muted text-uppercase small mb-0">Budget vs. Actual Performance</h6>
+                        <!-- Switch-style Toggle Container -->
+                        <!-- Primary Subtle Switch Container -->
+                        <div class="bg-primary-subtle rounded-pill p-1 d-inline-flex align-items-center" role="group" aria-label="Chart Scale Selector">
+                            <button 
+                                type="button" 
+                                :class="['btn', 'btn-sm', 'rounded-pill', 'px-3', chartScaleType === 'linear' ? 'btn-primary shadow-sm fw-semibold' : 'btn-link text-primary text-decoration-none']"
+                                @click="setChartScale('linear')"
+                            >
+                                <i class="fa-solid fa-chart-simple me-1"></i>Linear
+                            </button>
+                            <button 
+                                type="button" 
+                                :class="['btn', 'btn-sm', 'rounded-pill', 'px-3', chartScaleType === 'logarithmic' ? 'btn-primary shadow-sm fw-semibold' : 'btn-link text-primary text-decoration-none']"
+                                @click="setChartScale('logarithmic')"
+                            >
+                                <i class="fa-solid fa-arrow-up-right-dots me-1"></i>Logarithmic
+                            </button>
+                        </div>
                     </div>
                     <div class="card-body px-4 pb-4">
                         <div style="height: 300px;" class="position-relative">
@@ -83,15 +101,17 @@
                             <span class="fw-bold text-uppercase small text-muted d-block mb-1">Total Budget Amount</span>
                             <h3 class="fw-bold text-dark mb-1">{{ formatPeso(animatedTotalBudget) }}</h3>
 
-                            <!-- Skeleton Loader (Shows while loading OR before trend is calculated) -->
-                            <div v-if="isChartLoading || !budgetTrend" class="placeholder-glow mt-1">
-                                <span class="placeholder col-6 rounded-pill bg-secondary bg-opacity-25 py-2"></span>
-                            </div>
+                            <Transition name="fade-slide" mode="out-in">
+                                <!-- Skeleton Loader (Shows while loading OR before trend is calculated) -->
+                                <div v-if="isChartLoading || activeAnimations > 0 || !budgetTrend" class="placeholder-glow mt-1">
+                                    <span class="placeholder col-12 rounded-pill bg-secondary bg-opacity-25 py-2"></span>
+                                </div>
 
-                            <!-- Actual Content (Only renders once fully calculated) -->
-                            <span v-else :class="['badge', budgetTrend.isPositive ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger', 'rounded-pill px-2 py-1']">
-                                <i :class="[budgetTrend.iconClass, 'me-1']"></i>{{ budgetTrend.text }}
-                            </span>
+                                <!-- Actual Content (Only renders once fully calculated) -->
+                                <span v-else :class="['badge', budgetTrend.isPositive ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger', 'rounded-pill px-2 py-1']">
+                                    <i :class="[budgetTrend.iconClass, 'me-1']"></i>{{ budgetTrend.text }}
+                                </span>
+                            </Transition>
                         </div>
 
                         <!-- Right Icon Container (Font Awesome + Pure Bootstrap) -->
@@ -418,6 +438,7 @@
             Chart,Title,Tooltip,Legend,ArcElement,DoughnutController,LineController,LogarithmicScale,LineElement,BarElement,
         } from "chart.js";
     import { ref } from 'vue';
+    import { markRaw } from 'vue';
 
     Chart.register(
         Title,
@@ -437,6 +458,7 @@
             return {
                 isDetailLoading: true,
                 isChartLoading: true,
+                activeAnimations: 0,
                 budgetId: this.$route.query.id || null,
                 module: 'budget-item',
                 utilityUrl: '/api/budget-items',
@@ -493,6 +515,8 @@
                 currentPage: ref(1),
                 rows: ref(0),
                 filter: ref(''),
+                chartScaleType: 'linear', // Set Linear as default
+                chartInstance: null,
             }
         },
         watch:{
@@ -528,7 +552,7 @@
             },
             budgetTrend() {
                 // Return null if data is still loading to prevent false calculations
-                if (this.isChartLoading) {
+                if (this.isChartLoading || this.activeAnimations > 0) {
                     return null;
                 }
 
@@ -599,114 +623,139 @@
                     }
                 })
             },
-            renderChart(data) {
-                const canvas = document.getElementById('budgetChart');
-                if (!canvas) return;
+setChartScale(scaleType) {
+        if (this.chartScaleType === scaleType) return;
+        
+        this.chartScaleType = scaleType;
 
-                const ctx = canvas.getContext('2d');
-
-                if (this.chartInstance) {
-                    this.chartInstance.destroy();
+        if (this.chartInstance) {
+            this.chartInstance.options.scales.y.type = scaleType;
+            
+            this.chartInstance.options.scales.y.ticks.callback = (value) => {
+                if (scaleType === 'logarithmic') {
+                    if (value === 0) return '₱0';
+                    if (Math.log10(value) % 1 === 0 || value === 1) {
+                        return '₱' + value.toLocaleString();
+                    }
+                    return null;
                 }
+                return '₱' + value.toLocaleString();
+            };
 
-                this.chartInstance = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: data.labels,
-                        datasets: [
-                            {
-                                label: 'Budget',
-                                data: data.budgetValues,
-                                // Bootstrap 5 $gray-300 / subtle border gray
-                                backgroundColor: '#e9ecef',
-                                borderColor: '#ced4da',
-                                borderWidth: 1,
-                                borderRadius: 6,
-                                barPercentage: 0.8,
-                                minBarLength: 6,
-                            },
-                            {
-                                label: 'Actual',
-                                data: data.actualValues,
-                                // Subtle Bootstrap 5 Danger (#f8d7da) vs Primary/Info (#cff4fc or #cfe2ff)
-                                backgroundColor: (context) => {
-                                    const index = context.dataIndex;
-                                    const budget = parseFloat(data.budgetValues[index]) || 0;
-                                    const actual = parseFloat(data.actualValues[index]) || 0;
-                                    return actual > budget ? 'rgba(248, 215, 218, 0.85)' : 'rgba(207, 226, 255, 0.85)';
-                                },
-                                borderColor: (context) => {
-                                    const index = context.dataIndex;
-                                    const budget = parseFloat(data.budgetValues[index]) || 0;
-                                    const actual = parseFloat(data.actualValues[index]) || 0;
-                                    return actual > budget ? '#f5c2c7' : '#9ec5fe';
-                                },
-                                borderWidth: 1,
-                                borderRadius: 6,
-                                barPercentage: 0.8,
-                                minBarLength: 6,
-                            }
-                        ]
+            this.chartInstance.update();
+        }
+    },
+
+    renderChart(data) {
+        const canvas = document.getElementById('budgetChart');
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+
+        if (this.chartInstance) {
+            this.chartInstance.destroy();
+        }
+
+        // Wrap the Chart instance with markRaw
+        this.chartInstance = markRaw(new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.labels,
+                datasets: [
+                    {
+                        label: 'Budget',
+                        data: data.budgetValues,
+                        backgroundColor: '#e9ecef',
+                        borderColor: '#ced4da',
+                        borderWidth: 1,
+                        borderRadius: 6,
+                        barPercentage: 0.8,
+                        minBarLength: 6,
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        animation: {
-                            duration: 600,
-                            easing: 'easeOutQuart'
+                    {
+                        label: 'Actual',
+                        data: data.actualValues,
+                        backgroundColor: (context) => {
+                            const index = context.dataIndex;
+                            const budget = parseFloat(data.budgetValues[index]) || 0;
+                            const actual = parseFloat(data.actualValues[index]) || 0;
+                            return actual > budget ? 'rgba(248, 215, 218, 0.85)' : 'rgba(207, 226, 255, 0.85)';
                         },
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: { usePointStyle: true, padding: 20 }
-                            },
-                            tooltip: {
-                                backgroundColor: '#0f172a', // Solid Slate 900
-                                titleColor: '#ffffff',
-                                bodyColor: '#f8fafc',
-                                padding: 10,
-                                cornerRadius: 8,
-                                displayColors: false,
-                                callbacks: {
-                                    label: (context) => {
-                                        let val = context.parsed.y || 0;
-                                        return `${context.dataset.label}: ₱${val.toLocaleString()}`;
-                                    }
-                                }
-                            }
+                        borderColor: (context) => {
+                            const index = context.dataIndex;
+                            const budget = parseFloat(data.budgetValues[index]) || 0;
+                            const actual = parseFloat(data.actualValues[index]) || 0;
+                            return actual > budget ? '#f5c2c7' : '#9ec5fe';
                         },
-                        scales: {
-                            x: {
-                                grid: { display: false },
-                                ticks: {
-                                    maxRotation: 25, // Soft angle instead of steep tilt
-                                    minRotation: 0,
-                                    callback: function(val, index) {
-                                        let label = this.getLabelForValue(val);
-                                        return label.length > 15 ? label.substring(0, 12) + '...' : label;
-                                    }
-                                }
-                            },
-                            y: {
-                                type: 'logarithmic', // <--- Key change: logarithmic scale
-                                grid: { color: '#f1f5f9' },
-                                ticks: {
-                                    color: '#64748b',
-                                    callback: (value) => {
-                                        // Filter log ticks to keep numbers readable (1, 10, 100, 1k, 10k, 100k)
-                                        if (value === 0) return '₱0';
-                                        if (Math.log10(value) % 1 === 0 || value === 1) {
-                                            return '₱' + value.toLocaleString();
-                                        }
-                                        return null;
-                                    }
-                                }
+                        borderWidth: 1,
+                        borderRadius: 6,
+                        barPercentage: 0.8,
+                        minBarLength: 6,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {
+                    duration: 600,
+                    easing: 'easeOutQuart'
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { usePointStyle: true, padding: 20 }
+                    },
+                    tooltip: {
+                        backgroundColor: '#0f172a',
+                        titleColor: '#ffffff',
+                        bodyColor: '#f8fafc',
+                        padding: 10,
+                        cornerRadius: 8,
+                        displayColors: false,
+                        callbacks: {
+                            label: (context) => {
+                                let val = context.parsed.y || 0;
+                                return `${context.dataset.label}: ₱${val.toLocaleString()}`;
                             }
                         }
                     }
-                });
-            },
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            maxRotation: 25,
+                            minRotation: 0,
+                            callback: function(val) {
+                                let label = this.getLabelForValue(val);
+                                return label.length > 15 ? label.substring(0, 12) + '...' : label;
+                            }
+                        }
+                    },
+                    y: {
+                        type: this.chartScaleType,
+                        grid: { color: '#f1f5f9' },
+                        ticks: {
+                            color: '#64748b',
+                            callback: (value) => {
+                                if (this.chartScaleType === 'logarithmic') {
+                                    if (value === 0) return '₱0';
+                                    if (Math.log10(value) % 1 === 0 || value === 1) {
+                                        return '₱' + value.toLocaleString();
+                                    }
+                                    return null;
+                                }
+                                return '₱' + value.toLocaleString();
+                            }
+                        }
+                    }
+                }
+            }
+        }));
+    },
             animateCount(key, start, end, duration = 1000) {
+                this.activeAnimations++;
                 const startTime = performance.now();
                 
                 const step = (currentTime) => {
@@ -722,6 +771,7 @@
                         requestAnimationFrame(step);
                     } else {
                         this[key] = end; // Ensure exact final value
+                        this.activeAnimations = Math.max(0, this.activeAnimations - 1);
                     }
                 };
                 
@@ -820,5 +870,21 @@
     .fade-enter-from,
     .fade-leave-to {
         opacity: 0;
+    }
+
+    /* Fade and subtle slide up transition */
+    .fade-slide-enter-active,
+    .fade-slide-leave-active {
+        transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .fade-slide-enter-from {
+        opacity: 0;
+        transform: translateY(4px); /* Slightly slides up into place */
+    }
+
+    .fade-slide-leave-to {
+        opacity: 0;
+        transform: translateY(-4px); /* Gently drifts up when leaving */
     }
 </style>

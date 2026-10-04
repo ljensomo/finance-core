@@ -61,6 +61,7 @@ class BudgetController extends Controller
         $budget->budget_name = $request->input('budget_name');
         $budget->start_date = $request->input('start_date');
         $budget->end_date = $request->input('end_date');
+        $budget->status = $request->input('status');
         $budget->save();
 
         return response()->json('Budget updated successfully.');
