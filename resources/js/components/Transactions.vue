@@ -349,7 +349,7 @@
         </div>
     </div>
 
-    <!-- Transaction Modal -->
+    <!-- Transaction Canvas -->
     <div class="offcanvas offcanvas-end border-0 shadow" tabindex="-1" id="transactionModal" style="width: 550px;">
         
         <!-- Drawer Header -->
@@ -576,6 +576,7 @@
             return {
                 isLoading: false,
                 isTableLoading: true,
+                isEditing: false,
                 fields: [
                     { key: 'type', label: 'Type', sortable: true },
                     { key: 'formatted_date', label: 'Date', sortable: true },
@@ -604,8 +605,12 @@
                     budget_id: null,
                     budget_item_id: null,
                 },
-                isEditing: false,
-                file: null
+                file: null,
+                // dashboard metrics
+                currentMonthIncome: 0,
+                currentMonthExpense: 0,
+                totalIncome: 0,
+                totalExpense: 0,
             };
         },
         computed: {
@@ -630,6 +635,10 @@
                     console.error('Error fetching transactions:', error);
                 }).finally(() => {
                     this.isTableLoading = false;
+
+                    // generate dashboard metrics after transactions are fetched
+                    this.getCurrentMonthExpenses();
+                    this.getOverallExpenses();
                 });
             },
             add(modalId) {
@@ -763,7 +772,34 @@
                 this.form.budget_id = budgetId;
                 this.form.budget_item_id = null; // Reset tag selection when budget changes
                 this.fetchTags();
-            }
+            },
+            getCurrentMonthExpenses() {
+                axios.get('/dashboard/current-month-expenses')
+                    .then(response => {
+                        this.currentMonthExpense = response.data.total_expenses;
+                    })
+                    .catch(error => {
+                        console.error('Error fetching current month expenses:', error);
+                    });
+            },
+            getOverallExpenses() {
+                axios.get('/dashboard/overall-expenses')
+                    .then(response => {
+                        this.totalExpense = response.data.total_overall_expenses;
+                    })
+                    .catch(error => {
+                        console.error('Error fetching overall expenses:', error);
+                    });
+            },
+            getCurrentMonthIncome() {
+                axios.get('/dashboard/current-month-income')
+                    .then(response => {
+                        this.currentMonthIncome = response.data.total_income;
+                    })
+                    .catch(error => {
+                        console.error('Error fetching current month income:', error);
+                    });
+            },
         }
     }
 </script>

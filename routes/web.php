@@ -6,6 +6,7 @@ use App\Http\Controllers\SubCategoryController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DashboardControllerv2;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\GoogleSheetsController;
@@ -78,6 +79,9 @@ Route::middleware('auth:web')->group(function(){
     Route::get('/api/dashboard/monthly-income', [DashboardController::class, 'getMonthlyIncome'])->name('dashboard.monthlyIncome');
     Route::get('/api/dashboard/monthly-expenses', [DashboardController::class, 'getMonthlyExpenses'])->name('dashboard.monthlyExpenses');
     Route::get('/api/dashboard/spending-categories', [DashboardController::class, 'getSpendingCategories'])->name('dashboard.spendingCategories');
+    // v2
+    Route::get('/dashboard/current-month-expenses', [DashboardControllerv2::class, 'getCurrentMonthExpenses'])->name('dashboard.currentMonthExpenses');
+    Route::get('/dashboard/overall-expenses', [DashboardControllerv2::class, 'getOverallExpenses'])->name('dashboard.overallExpenses');
 
     // Monthly Dashboard routes
     Route::get('/api/monthly-dashboard/data', [DashboardController::class, 'getMonthlyDashboardData'])->name('monthlyDashboard.data');
