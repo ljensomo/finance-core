@@ -13,19 +13,32 @@
                                     <i class="fa-solid fa-arrow-trend-down small"></i>
                                 </div>
                             </div>
-                            <!-- Main Metric (Current Month) -->
-                            <h3 class="fw-bold mb-1 font-monospace text-danger">
-                                {{ formatPeso(currentMonthExpense) }}
-                            </h3>
+
+                            <transition name="fade-metric" mode="out-in">
+                                <!-- Main Metric (Current Month) -->
+                                <div v-if="isMetricsLoading" class="placeholder-glow my-1">
+                                    <span class="placeholder col-8 bg-secondary rounded py-3"></span>
+                                </div>
+                                <h3 v-else class="fw-bold mb-1 font-monospace text-danger">
+                                    {{ formatPeso(animatedCurrentMonthExpense) }}
+                                </h3>
+                            </transition>
+
                             <p class="text-muted small mb-0">This month</p>
                         </div>
 
                         <!-- Secondary Metric (Overall) -->
                         <div class="border-top pt-2 mt-3 d-flex justify-content-between align-items-center">
                             <span class="text-muted extra-small">Overall Expenses:</span>
-                            <span class="fw-semibold font-monospace text-secondary small">
-                                {{ formatPeso(totalExpense) }}
-                            </span>
+
+                            <transition name="fade-metric" mode="out-in">
+                                <div v-if="isMetricsLoading" class="placeholder-glow w-25 text-end">
+                                    <span class="placeholder col-12 bg-secondary rounded"></span>
+                                </div>
+                                <span v-else class="fw-semibold font-monospace text-secondary small">
+                                    {{ formatPeso(animatedTotalExpense) }}
+                                </span>
+                            </transition>
                         </div>
                     </div>
                 </div>
@@ -43,18 +56,28 @@
                                 </div>
                             </div>
                             <!-- Main Metric (Current Month) -->
-                            <h3 class="fw-bold mb-1 font-monospace text-success">
-                                {{ formatPeso(currentMonthIncome) }}
-                            </h3>
+                            <transition name="fade-metric" mode="out-in">
+                                <div v-if="isMetricsLoading" class="placeholder-glow my-1">
+                                    <span class="placeholder col-8 bg-secondary rounded py-3"></span>
+                                </div>
+                                <h3 v-else class="fw-bold mb-1 font-monospace text-success">
+                                    {{ formatPeso(animatedCurrentMonthIncome) }}
+                                </h3>
+                            </transition>
                             <p class="text-muted small mb-0">This month</p>
                         </div>
 
                         <!-- Secondary Metric (Overall) -->
                         <div class="border-top pt-2 mt-3 d-flex justify-content-between align-items-center">
                             <span class="text-muted extra-small">Overall Income:</span>
-                            <span class="fw-semibold font-monospace text-secondary small">
-                                {{ formatPeso(totalIncome) }}
-                            </span>
+                            <transition name="fade-metric" mode="out-in">
+                                <div v-if="isMetricsLoading" class="placeholder-glow w-25 text-end">
+                                    <span class="placeholder col-12 bg-secondary rounded"></span>
+                                </div>
+                                <span v-else class="fw-semibold font-monospace text-secondary small">
+                                    {{ formatPeso(animatedTotalIncome) }}
+                                </span>
+                            </transition>
                         </div>
                     </div>
                 </div>
@@ -72,18 +95,28 @@
                                 </div>
                             </div>
                             <!-- Main Metric (Current Month Net) -->
-                            <h3 class="fw-bold mb-1 font-monospace" :class="(currentMonthIncome - currentMonthExpense) >= 0 ? 'text-primary' : 'text-danger'">
-                                {{ formatPeso(currentMonthIncome - currentMonthExpense) }}
-                            </h3>
+                            <transition name="fade-metric" mode="out-in">
+                                <div v-if="isMetricsLoading" class="placeholder-glow my-1">
+                                    <span class="placeholder col-8 bg-secondary rounded py-3"></span>
+                                </div>
+                                <h3 v-else class="fw-bold mb-1 font-monospace" :class="(animatedCurrentMonthIncome - animatedCurrentMonthExpense) >= 0 ? 'text-primary' : 'text-danger'">
+                                    {{ formatPeso(animatedCurrentMonthIncome - animatedCurrentMonthExpense) }}
+                                </h3>
+                            </transition>
                             <p class="text-muted small mb-0">This month net</p>
                         </div>
 
                         <!-- Secondary Metric (Overall Net) -->
                         <div class="border-top pt-2 mt-3 d-flex justify-content-between align-items-center">
                             <span class="text-muted extra-small">Overall Balance:</span>
-                            <span class="fw-semibold font-monospace text-secondary small">
-                                {{ formatPeso(totalIncome - totalExpense) }}
-                            </span>
+                            <transition name="fade-metric" mode="out-in">
+                                <div v-if="isMetricsLoading" class="placeholder-glow w-25 text-end">
+                                    <span class="placeholder col-12 bg-secondary rounded"></span>
+                                </div>
+                                <span v-else class="fw-semibold font-monospace text-secondary small">
+                                    {{ formatPeso(animatedTotalIncome - animatedTotalExpense) }}
+                                </span>
+                            </transition>
                         </div>
                     </div>
                 </div>
@@ -574,8 +607,10 @@
         },
         data() {
             return {
+                // isloading vars
                 isLoading: false,
                 isTableLoading: true,
+                isMetricsLoading: true,
                 isEditing: false,
                 fields: [
                     { key: 'type', label: 'Type', sortable: true },
@@ -611,7 +646,27 @@
                 currentMonthExpense: 0,
                 totalIncome: 0,
                 totalExpense: 0,
+                // animations
+                activeAnimations: 0,
+                animatedCurrentMonthIncome: 0,
+                animatedCurrentMonthExpense: 0,
+                animatedTotalIncome: 0,
+                animatedTotalExpense: 0,
             };
+        },
+        watch:{
+            currentMonthIncome(newVal, oldVal) {
+                this.animateCount('animatedCurrentMonthIncome', oldVal, newVal);
+            },
+            currentMonthExpense(newVal, oldVal) {
+                this.animateCount('animatedCurrentMonthExpense', oldVal, newVal);
+            },
+            totalIncome(newVal, oldVal) {
+                this.animateCount('animatedTotalIncome', oldVal, newVal);
+            },
+            totalExpense(newVal, oldVal) {
+                this.animateCount('animatedTotalExpense', oldVal, newVal);
+            },
         },
         computed: {
             paginatedItems() {
@@ -639,6 +694,10 @@
                     // generate dashboard metrics after transactions are fetched
                     this.getCurrentMonthExpenses();
                     this.getOverallExpenses();
+                    this.getCurrentMonthIncome();
+                    this.getOverallIncome();
+
+                    this.isMetricsLoading = false;
                 });
             },
             add(modalId) {
@@ -773,56 +832,80 @@
                 this.form.budget_item_id = null; // Reset tag selection when budget changes
                 this.fetchTags();
             },
-            getCurrentMonthExpenses() {
-                axios.get('/dashboard/current-month-expenses')
-                    .then(response => {
-                        this.currentMonthExpense = response.data.total_expenses;
-                    })
-                    .catch(error => {
-                        console.error('Error fetching current month expenses:', error);
-                    });
+            // get metrics functions
+            async getCurrentMonthExpenses() {
+                this.isMetricsLoading = true;
+                try {
+                    const response = await axios.get('/dashboard/current-month-expenses');
+                    this.currentMonthExpense = response.data.total_expenses;
+                } catch (error) {
+                    console.error('Error fetching current month expenses:', error);
+                } finally {
+                    this.isMetricsLoading = false;
+                }
             },
-            getOverallExpenses() {
-                axios.get('/dashboard/overall-expenses')
-                    .then(response => {
-                        this.totalExpense = response.data.total_overall_expenses;
-                    })
-                    .catch(error => {
-                        console.error('Error fetching overall expenses:', error);
-                    });
+            async getOverallExpenses() {
+                this.isMetricsLoading = true;
+                try {
+                    const response = await axios.get('/dashboard/overall-expenses');
+                    this.totalExpense = response.data.total_overall_expenses;
+                } catch (error) {
+                    console.error('Error fetching overall expenses:', error);
+                } finally {
+                    this.isMetricsLoading = false;
+                }
             },
-            getCurrentMonthIncome() {
-                axios.get('/dashboard/current-month-income')
-                    .then(response => {
-                        this.currentMonthIncome = response.data.total_income;
-                    })
-                    .catch(error => {
-                        console.error('Error fetching current month income:', error);
-                    });
+            async getCurrentMonthIncome() {
+                this.isMetricsLoading = true;
+                try {
+                    const response = await axios.get('/dashboard/current-month-income');
+                    this.currentMonthIncome = response.data.total_income;
+                } catch (error) {
+                    console.error('Error fetching current month income:', error);
+                } finally {
+                    this.isMetricsLoading = false;
+                }
+            },
+            async getOverallIncome() {
+                this.isMetricsLoading = true;
+                try {
+                    const response = await axios.get('/dashboard/overall-income');
+                    this.totalIncome = response.data.total_overall_income;
+                } catch (error) {
+                    console.error('Error fetching overall income:', error);
+                } finally {
+                    this.isMetricsLoading = false;
+                }
+            },
+            // animation functions
+            animateCount(key, start, end, duration = 300) {
+                this.activeAnimations++;
+                const startTime = performance.now();
+                
+                const step = (currentTime) => {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    
+                    // Ease-out cubic formula for smooth deceleration
+                    const easeOutProgress = 1 - Math.pow(1 - progress, 3);
+                    
+                    this[key] = start + (end - start) * easeOutProgress;
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(step);
+                    } else {
+                        this[key] = end; // Ensure exact final value
+                        this.activeAnimations = Math.max(0, this.activeAnimations - 1);
+                    }
+                };
+                
+                requestAnimationFrame(step);
             },
         }
     }
 </script>
 
 <style scoped>
-    /* Custom Subtles (if not in your Bootstrap version) */
-    .bg-orange-subtle { background-color: #fff3e0; }
-    .text-orange { color: #ef6c00; }
-
-    .bg-purple-subtle { background-color: #f3e5f5; }
-    .text-purple { color: #7b1fa2; }
-
-    .bg-blue-subtle { background-color: #e3f2fd; }
-    .text-blue { color: #1976d2; }
-
-    .bg-indigo-subtle { background-color: #e8eaf6; }
-    .text-indigo { color: #3f51b5; }
-
-    /* Ensure icons are centered */
-    .category-icon-sm i {
-    display: block;
-    }
-
     .fw-black { 
         font-weight: 700; 
     }
@@ -886,5 +969,17 @@
         opacity: 0.5;
         background-color: var(--bs-primary-bg-subtle) !important;
         border-color: var(--bs-primary-border-subtle) !important;
+    }
+
+    /* Smooth fade & micro-scale transition for metric loading */
+    .fade-metric-enter-active,
+    .fade-metric-leave-active {
+        transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .fade-metric-enter-from,
+    .fade-metric-leave-to {
+        opacity: 0;
+        transform: scale(0.98);
     }
 </style>

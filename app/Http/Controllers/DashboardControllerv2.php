@@ -44,4 +44,13 @@ class DashboardControllerv2 extends Controller{
 
         return response()->json(['total_income' => $income]);
     }
+
+    public function getOverallIncome(){
+        
+        $overallIncome = Transaction::where('user_id', Auth::id())
+            ->where('type', 1)
+            ->sum('amount');
+
+        return response()->json(['total_overall_income' => $overallIncome]);
+    }
 }

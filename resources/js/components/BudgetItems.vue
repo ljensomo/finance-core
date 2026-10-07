@@ -545,10 +545,10 @@
         },
         watch:{
             totalBudget(newValue, oldValue){
-                this.animateCount('animatedTotalBudget', oldValue || 0, newValue, 1500);
+                this.animateCount('animatedTotalBudget', oldValue || 0, newValue, 500);
             },
             totalActual(newValue, oldValue){
-                this.animateCount('animatedTotalExpenses', oldValue || 0, newValue, 1500);
+                this.animateCount('animatedTotalExpenses', oldValue || 0, newValue, 500);
             },
             'form.item_name': function (newTitle) {
                 if (newTitle) {
@@ -575,7 +575,7 @@
                 return Math.min(this.currentPage * this.perPage, this.budgets.length)
             },
             budgetTrend() {
-                // Return null if data is still loading to prevent false calculations
+                // 1. Guard against active loading or animation states
                 if (this.isChartLoading || this.activeAnimations > 0) {
                     return null;
                 }
@@ -583,15 +583,25 @@
                 const current = Number(this.totalBudget) || 0;
                 const previous = Number(this.lastMonthTotalBudget) || 0;
 
+                // 2. Handle zero baseline gracefully without assuming a false +100% surge
                 if (previous === 0) {
+                    if (current === 0) {
+                        return {
+                            isPositive: true,
+                            iconClass: 'fa-solid fa-minus',
+                            text: '0% from last month'
+                        };
+                    }
+                    // If previous is truly 0 in database and current > 0, show "N/A" or new budget indicator
                     return {
-                        isPositive: current >= 0,
-                        iconClass: current > 0 ? 'fa-solid fa-arrow-trend-up' : 'fa-solid fa-minus',
-                        text: current > 0 ? '+100% from last month' : '0% from last month'
+                        isPositive: true,
+                        iconClass: 'fa-solid fa-arrow-trend-up',
+                        text: 'New this month' // Prevents misleading "+100%" flash
                     };
                 }
 
-                const percentageChange = ((current - previous) / previous) * 100;
+                // 3. Standard percentage change calculation
+                const percentageChange = ((current - previous) / Math.abs(previous)) * 100;
                 const isPositive = percentageChange >= 0;
                 const formattedPercentage = Math.abs(percentageChange).toFixed(0);
 
@@ -600,7 +610,7 @@
                     iconClass: isPositive ? 'fa-solid fa-arrow-trend-up' : 'fa-solid fa-arrow-trend-down',
                     text: `${isPositive ? '+' : '-'}${formattedPercentage}% from last month`
                 };
-            }
+            },
         },
         methods: {
             async loadBudgets(){
@@ -647,137 +657,136 @@
                     }
                 })
             },
-setChartScale(scaleType) {
-        if (this.chartScaleType === scaleType) return;
-        
-        this.chartScaleType = scaleType;
+            setChartScale(scaleType) {
+                if (this.chartScaleType === scaleType) return;
+                
+                this.chartScaleType = scaleType;
 
-        if (this.chartInstance) {
-            this.chartInstance.options.scales.y.type = scaleType;
-            
-            this.chartInstance.options.scales.y.ticks.callback = (value) => {
-                if (scaleType === 'logarithmic') {
-                    if (value === 0) return '₱0';
-                    if (Math.log10(value) % 1 === 0 || value === 1) {
-                        return '₱' + value.toLocaleString();
-                    }
-                    return null;
-                }
-                return '₱' + value.toLocaleString();
-            };
-
-            this.chartInstance.update();
-        }
-    },
-
-    renderChart(data) {
-        const canvas = document.getElementById('budgetChart');
-        if (!canvas) return;
-
-        const ctx = canvas.getContext('2d');
-
-        if (this.chartInstance) {
-            this.chartInstance.destroy();
-        }
-
-        // Wrap the Chart instance with markRaw
-        this.chartInstance = markRaw(new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: data.labels,
-                datasets: [
-                    {
-                        label: 'Budget',
-                        data: data.budgetValues,
-                        backgroundColor: '#e9ecef',
-                        borderColor: '#ced4da',
-                        borderWidth: 1,
-                        borderRadius: 6,
-                        barPercentage: 0.8,
-                        minBarLength: 6,
-                    },
-                    {
-                        label: 'Actual',
-                        data: data.actualValues,
-                        backgroundColor: (context) => {
-                            const index = context.dataIndex;
-                            const budget = parseFloat(data.budgetValues[index]) || 0;
-                            const actual = parseFloat(data.actualValues[index]) || 0;
-                            return actual > budget ? 'rgba(248, 215, 218, 0.85)' : 'rgba(207, 226, 255, 0.85)';
-                        },
-                        borderColor: (context) => {
-                            const index = context.dataIndex;
-                            const budget = parseFloat(data.budgetValues[index]) || 0;
-                            const actual = parseFloat(data.actualValues[index]) || 0;
-                            return actual > budget ? '#f5c2c7' : '#9ec5fe';
-                        },
-                        borderWidth: 1,
-                        borderRadius: 6,
-                        barPercentage: 0.8,
-                        minBarLength: 6,
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                animation: {
-                    duration: 600,
-                    easing: 'easeOutQuart'
-                },
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: { usePointStyle: true, padding: 20 }
-                    },
-                    tooltip: {
-                        backgroundColor: '#0f172a',
-                        titleColor: '#ffffff',
-                        bodyColor: '#f8fafc',
-                        padding: 10,
-                        cornerRadius: 8,
-                        displayColors: false,
-                        callbacks: {
-                            label: (context) => {
-                                let val = context.parsed.y || 0;
-                                return `${context.dataset.label}: ₱${val.toLocaleString()}`;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        grid: { display: false },
-                        ticks: {
-                            maxRotation: 25,
-                            minRotation: 0,
-                            callback: function(val) {
-                                let label = this.getLabelForValue(val);
-                                return label.length > 15 ? label.substring(0, 12) + '...' : label;
-                            }
-                        }
-                    },
-                    y: {
-                        type: this.chartScaleType,
-                        grid: { color: '#f1f5f9' },
-                        ticks: {
-                            color: '#64748b',
-                            callback: (value) => {
-                                if (this.chartScaleType === 'logarithmic') {
-                                    if (value === 0) return '₱0';
-                                    if (Math.log10(value) % 1 === 0 || value === 1) {
-                                        return '₱' + value.toLocaleString();
-                                    }
-                                    return null;
-                                }
+                if (this.chartInstance) {
+                    this.chartInstance.options.scales.y.type = scaleType;
+                    
+                    this.chartInstance.options.scales.y.ticks.callback = (value) => {
+                        if (scaleType === 'logarithmic') {
+                            if (value === 0) return '₱0';
+                            if (Math.log10(value) % 1 === 0 || value === 1) {
                                 return '₱' + value.toLocaleString();
                             }
+                            return null;
+                        }
+                        return '₱' + value.toLocaleString();
+                    };
+
+                    this.chartInstance.update();
+                }
+            },
+            renderChart(data) {
+                const canvas = document.getElementById('budgetChart');
+                if (!canvas) return;
+
+                const ctx = canvas.getContext('2d');
+
+                if (this.chartInstance) {
+                    this.chartInstance.destroy();
+                }
+
+                // Wrap the Chart instance with markRaw
+                this.chartInstance = markRaw(new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.labels,
+                        datasets: [
+                            {
+                                label: 'Budget',
+                                data: data.budgetValues,
+                                backgroundColor: '#e9ecef',
+                                borderColor: '#ced4da',
+                                borderWidth: 1,
+                                borderRadius: 6,
+                                barPercentage: 0.8,
+                                minBarLength: 6,
+                            },
+                            {
+                                label: 'Actual',
+                                data: data.actualValues,
+                                backgroundColor: (context) => {
+                                    const index = context.dataIndex;
+                                    const budget = parseFloat(data.budgetValues[index]) || 0;
+                                    const actual = parseFloat(data.actualValues[index]) || 0;
+                                    return actual > budget ? 'rgba(248, 215, 218, 0.85)' : 'rgba(207, 226, 255, 0.85)';
+                                },
+                                borderColor: (context) => {
+                                    const index = context.dataIndex;
+                                    const budget = parseFloat(data.budgetValues[index]) || 0;
+                                    const actual = parseFloat(data.actualValues[index]) || 0;
+                                    return actual > budget ? '#f5c2c7' : '#9ec5fe';
+                                },
+                                borderWidth: 1,
+                                borderRadius: 6,
+                                barPercentage: 0.8,
+                                minBarLength: 6,
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: {
+                            duration: 600,
+                            easing: 'easeOutQuart'
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { usePointStyle: true, padding: 20 }
+                            },
+                            tooltip: {
+                                backgroundColor: '#0f172a',
+                                titleColor: '#ffffff',
+                                bodyColor: '#f8fafc',
+                                padding: 10,
+                                cornerRadius: 8,
+                                displayColors: false,
+                                callbacks: {
+                                    label: (context) => {
+                                        let val = context.parsed.y || 0;
+                                        return `${context.dataset.label}: ₱${val.toLocaleString()}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: {
+                                    maxRotation: 25,
+                                    minRotation: 0,
+                                    callback: function(val) {
+                                        let label = this.getLabelForValue(val);
+                                        return label.length > 15 ? label.substring(0, 12) + '...' : label;
+                                    }
+                                }
+                            },
+                            y: {
+                                type: this.chartScaleType,
+                                grid: { color: '#f1f5f9' },
+                                ticks: {
+                                    color: '#64748b',
+                                    callback: (value) => {
+                                        if (this.chartScaleType === 'logarithmic') {
+                                            if (value === 0) return '₱0';
+                                            if (Math.log10(value) % 1 === 0 || value === 1) {
+                                                return '₱' + value.toLocaleString();
+                                            }
+                                            return null;
+                                        }
+                                        return '₱' + value.toLocaleString();
+                                    }
+                                }
+                            }
                         }
                     }
-                }
-            }
-        }));
-    },
+                }));
+            },
             animateCount(key, start, end, duration = 1000) {
                 this.activeAnimations++;
                 const startTime = performance.now();

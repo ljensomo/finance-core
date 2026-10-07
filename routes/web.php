@@ -82,6 +82,8 @@ Route::middleware('auth:web')->group(function(){
     // v2
     Route::get('/dashboard/current-month-expenses', [DashboardControllerv2::class, 'getCurrentMonthExpenses'])->name('dashboard.currentMonthExpenses');
     Route::get('/dashboard/overall-expenses', [DashboardControllerv2::class, 'getOverallExpenses'])->name('dashboard.overallExpenses');
+    Route::get('/dashboard/current-month-income', [DashboardControllerv2::class, 'getCurrentMonthIncome'])->name('dashboard.currentMonthIncome');
+    Route::get('/dashboard/overall-income', [DashboardControllerv2::class, 'getOverallIncome'])->name('dashboard.overallIncome');
 
     // Monthly Dashboard routes
     Route::get('/api/monthly-dashboard/data', [DashboardController::class, 'getMonthlyDashboardData'])->name('monthlyDashboard.data');
