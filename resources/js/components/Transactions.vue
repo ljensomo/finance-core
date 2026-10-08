@@ -834,47 +834,43 @@
             },
             // get metrics functions
             async getCurrentMonthExpenses() {
-                this.isMetricsLoading = true;
                 try {
                     const response = await axios.get('/dashboard/current-month-expenses');
                     this.currentMonthExpense = response.data.total_expenses;
                 } catch (error) {
                     console.error('Error fetching current month expenses:', error);
                 } finally {
-                    this.isMetricsLoading = false;
+                    // this.isMetricsLoading = false;
                 }
             },
             async getOverallExpenses() {
-                this.isMetricsLoading = true;
                 try {
                     const response = await axios.get('/dashboard/overall-expenses');
                     this.totalExpense = response.data.total_overall_expenses;
                 } catch (error) {
                     console.error('Error fetching overall expenses:', error);
                 } finally {
-                    this.isMetricsLoading = false;
+                    // this.isMetricsLoading = false;
                 }
             },
             async getCurrentMonthIncome() {
-                this.isMetricsLoading = true;
                 try {
                     const response = await axios.get('/dashboard/current-month-income');
                     this.currentMonthIncome = response.data.total_income;
                 } catch (error) {
                     console.error('Error fetching current month income:', error);
                 } finally {
-                    this.isMetricsLoading = false;
+                    // this.isMetricsLoading = false;
                 }
             },
             async getOverallIncome() {
-                this.isMetricsLoading = true;
                 try {
                     const response = await axios.get('/dashboard/overall-income');
                     this.totalIncome = response.data.total_overall_income;
                 } catch (error) {
                     console.error('Error fetching overall income:', error);
                 } finally {
-                    this.isMetricsLoading = false;
+                    // this.isMetricsLoading = false;
                 }
             },
             // animation functions
