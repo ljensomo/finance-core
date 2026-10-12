@@ -2,39 +2,82 @@
     <div class="container-fluid">
         <div class="card shadow-sm border border-secondary-subtle rounded-4 overflow-hidden">
             <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                <!-- Left Section: Icon & Title -->
                 <div class="d-flex align-items-center">
-                    <div class="icon-box bg-primary-subtle text-primary me-3 px-3 py-2 rounded">
+                    <div class="icon-box bg-primary-subtle text-primary me-3 px-3 py-2 rounded-pill">
                         <i class="fa-solid fa-heart"></i>
                     </div>
                     <h5 class="mb-0 fw-bold">Wishlists</h5>
                 </div>
             </div>
-            <div class="card-body px-4 pb-4">
-                <DataTable
-                    :items="wishlists"
-                    :fields="fields"
-                    :form-fields="formFields"
-                    :utilityUrl="utilityUrl"
-                    :module="module"
-                    :formatters="formatters"
-                    @select-item="selectedItem = $event"
-                    @reload-table="loadWishlists"
-                    :isTableLoading="isTableLoading"
-                >
-                </DataTable>
+            <div class="card-body">
+                <div class="row g-3 mb-4 align-items-center">
+                    <div class="col-md-8 d-flex gap-2">
+                        <button class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm" @click="add()">
+                            <i class="fa-solid fa-plus me-2"></i>Add Wishlist
+                        </button>
+                    </div>
+                    <div class="col-md-4 d-flex gap-2 align-items-center">
+                        <!-- Search Input Group -->
+                        <div class="input-group input-group-sm rounded-pill overflow-hidden shadow-sm">
+                            <!-- Icon Prefix (Rounded Start) -->
+                            <span class="input-group-text bg-light border-secondary-subtle border-end-0 text-muted rounded-start-pill ps-3">
+                                <i class="fa-solid fa-magnifying-glass small"></i>
+                            </span>
+
+                            <!-- Search Input (Rounded End) -->
+                            <BFormInput
+                                v-model="filter"
+                                placeholder="Type to Search..."
+                                size="sm"
+                                class="border-secondary-subtle border-start-0 shadow-none fw-medium text-secondary rounded-end-pill pe-3"
+                            />
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive rounded-3 overflow-hidden border border-secondary-subtle">
+                    <BTable
+                        :items="wishlists"
+                        :fields="fields"
+                        :per-page="perPage"
+                        :current-page="currentPage"
+                        :filter="filter"
+                        :busy="isTableLoading"
+                        hover
+                        small
+                        class="align-middle border-top"
+                        thead-class="table-light text-uppercase small fw-bold"
+                        :tbody-tr-class="getRowClass"
+                        :tbody-transition-props="tableTransition"
+                    >
+                        <template #table-busy>
+                            <div class="text-center text-primary my-4 py-4 bg-dark-subtle rounded-3">
+                                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                <span class="fw-medium text-secondary">Loading wishlists...</span>
+                            </div>
+                        </template>
+
+                        <template #cell(estimated_cost)="row">
+                            <div class="px-3 py-1 rounded-pill fw-semibold text-end font-monospace bg-dark bg-opacity-10 text-dark-emphasis">
+                                {{ formatPeso(row.item.estimated_cost ?? 0) }}
+                            </div>
+                        </template>
+
+                    </BTable>
+                </div>
             </div>
         </div>
     </div>
 </template>
 
 <script>
-import DataTable from '../Shared/DataTable.vue'
+import DataTable from './Shared/DataTable.vue'
 
 export default {
     components: { DataTable },
     data() {
         return {
+            // loading vars
+            isLoading:true,
             module: 'wishlist',
             utilityUrl: '/api/wishlists',
             selectedItem: null,
