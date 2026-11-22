@@ -3,59 +3,114 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Wishlist extends Model{
-
-    protected $appends = [
-        'category_label',
-        'type_label',
-        'formatted_created_at',
-        'formatted_target_date',
-    ];
-
-    // Cast target_date so Eloquent converts it to a Carbon instance automatically
-    protected $casts = [
-        'target_date' => 'date',
-    ];
-
-    public const CATEGORIES = [
-        1 => 'Exterior & Building',
-        2 => 'Living Room',
-        3 => 'Kitchen & Dining',
-        4 => 'Bedroom & Bath',
-        5 => 'Home Office / Workstation',
-        6 => 'Mobile & On-the-Go',
-        7 => 'Studio & Creative Work',
-        8 => 'Network & Tech Infrastructure',
-        9 => 'Personal Care & Wardrobe',
-        10 => 'Leisure & Recreation',
-    ];
+class Wishlist extends Model
+{
+    public const TYPE_PURCHASE = 1;
+    public const TYPE_TRAVEL   = 2;
 
     public const TYPES = [
-        1 => 'Home Improvement & Renovation',
-        2 => 'Home Appliances',
-        3 => 'Furniture & Home Decor',
-        4 => 'Electronics & Tech',
-        5 => 'Fashion & Lifestyle',
-        6 => 'Hobbies & Creative',
-        7 => 'Experiences & Travel',
-        8 => 'Gifts & Occasions',
-        9 => 'Everyday & Maintenance',
+        self::TYPE_PURCHASE => 'Purchase',
+        self::TYPE_TRAVEL   => 'Travel',
     ];
 
-    // Accessor for Category Label ($item->category_label)
-    public function getCategoryLabelAttribute(): string
+    public const PRIORITY_HIGH   = 1;
+    public const PRIORITY_MEDIUM = 2;
+    public const PRIORITY_LOW    = 3;
+
+    public const PRIORITIES = [
+        self::PRIORITY_HIGH   => 'High',
+        self::PRIORITY_MEDIUM => 'Medium',
+        self::PRIORITY_LOW    => 'Low',
+    ];
+
+    public const STATUS_SAVING = 1;
+    public const STATUS_READY  = 2;
+    public const STATUS_DONE   = 3;
+
+    public const STATUSES = [
+        self::STATUS_SAVING => 'Saving',
+        self::STATUS_READY  => 'Ready',
+        self::STATUS_DONE   => 'Done',
+    ];
+
+    protected $fillable = [
+        'user_id',
+        'type',
+        'item',
+        'category_id',
+        'category',
+        'priority',
+        'estimated_cost',
+        'saved_amount',
+        'actual_cost',
+        'target_date',
+        'end_date',
+        'completed_at',
+        'status',
+        'notes',
+        'expense_id',
+    ];
+
+    protected $appends = [
+        'type_label',
+        'category_label',
+        'priority_label',
+        'status_label',
+        'formatted_created_at',
+        'formatted_target_date',
+        'formatted_date_range',
+    ];
+
+    protected $casts = [
+        'type'           => 'integer',
+        'category_id'    => 'integer',
+        'priority'       => 'integer',
+        'status'         => 'integer',
+        'estimated_cost' => 'decimal:2',
+        'saved_amount'   => 'decimal:2',
+        'actual_cost'    => 'decimal:2',
+        'target_date'    => 'date',
+        'end_date'       => 'date',
+        'completed_at'   => 'date',
+    ];
+
+    // Relationships
+    public function categoryModel(): BelongsTo
     {
-        return self::CATEGORIES[$this->category] ?? 'Uncategorized';
+        return $this->belongsTo(WishlistCategory::class, 'category');
     }
 
-    // Accessor for Type Label ($item->type_label)
+    // Accessors
     public function getTypeLabelAttribute(): string
     {
-        return self::TYPES[$this->type] ?? 'Unknown';
+        return self::TYPES[(int) $this->type] ?? 'Purchase';
     }
 
-    // Human-friendly, context-aware date attribute
+    public function getCategoryLabelAttribute(): string
+    {
+        if ($this->relationLoaded('categoryModel') && $this->categoryModel) {
+            return $this->categoryModel->name;
+        }
+
+        if ($this->category) {
+            return WishlistCategory::whereKey($this->category)->value('name') ?? 'Uncategorized';
+        }
+
+        return 'Uncategorized';
+    }
+
+    public function getPriorityLabelAttribute(): string
+    {
+        return self::PRIORITIES[(int) $this->priority] ?? 'Low';
+    }
+
+    public function getStatusLabelAttribute(): string
+    {
+        return self::STATUSES[(int) $this->status] ?? 'Saving';
+    }
+
     public function getFormattedCreatedAtAttribute(): string
     {
         if (!$this->created_at) {
@@ -89,5 +144,17 @@ class Wishlist extends Model{
 
         return $this->target_date->format('M d, Y');
     }
-    
+
+    public function getFormattedDateRangeAttribute(): string
+    {
+        if (!$this->target_date) {
+            return '—';
+        }
+
+        if ((int) $this->type === self::TYPE_TRAVEL && $this->end_date) {
+            return $this->target_date->format('M d, Y') . ' – ' . $this->end_date->format('M d, Y');
+        }
+
+        return $this->target_date->format('M d, Y');
+    }
 }

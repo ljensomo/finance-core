@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\StoreWishlistRequest;
 use App\Models\Wishlist;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class WishlistController extends Controller
 {
@@ -12,27 +15,31 @@ class WishlistController extends Controller
      */
     public function list(Request $request)
     {
-        $wishlists = Wishlist::where('user_id', auth()->user()->id)->get();
+        $wishlists = Wishlist::where('user_id', Auth::id())->get();
         return response()->json($wishlists);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreWishlistRequest $request)
     {
-        $wishlist = new Wishlist();
-        $wishlist->user_id = auth()->user()->id;
-        $wishlist->item = $request->input('item');
-        $wishlist->category = $request->input('category');
-        $wishlist->type = $request->input('type');
-        $wishlist->notes = $request->input('notes');
-        $wishlist->priority = $request->input('priority');
-        $wishlist->status = $request->input('status');
-        $wishlist->estimated_cost = $request->input('estimated_cost');
-        $wishlist->save();
+        $data = $request->validated();
+        $isDone = (int) $data['status'] === Wishlist::STATUS_DONE;
 
-        return response()->json($wishlist);
+        $wishlist = Wishlist::create([
+            ...$data,
+            'user_id'      => Auth::id(),
+            'saved_amount' => $isDone ? ($data['actual_cost'] ?? 0) : ($data['saved_amount'] ?? 0),
+            'actual_cost'  => $isDone ? $data['actual_cost'] : null,
+            'end_date'     => (int) $data['type'] === Wishlist::TYPE_TRAVEL ? ($data['end_date'] ?? null) : null,
+            'completed_at' => $isDone ? ($data['completed_at'] ?? now()->toDateString()) : null,
+        ]);
+
+        return response()->json([
+            'message' => 'Wishlist item added successfully.',
+            'data'    => $wishlist,
+        ], 201);
     }
 
     /**

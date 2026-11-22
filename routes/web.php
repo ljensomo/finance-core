@@ -13,9 +13,9 @@ use App\Http\Controllers\GoogleSheetsController;
 use App\Http\Controllers\ImportLogsController;
 use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\BudgetItemController;
-use App\Models\Budget;
+use App\Http\Controllers\WishlistCategoryController;
+use App\Http\Controllers\WishlistGroupController;
 use Illuminate\Support\Facades\Auth;
-use Maatwebsite\Excel\Importer;
 
 Route::get('/', function () {
     return view('welcome');
@@ -110,5 +110,12 @@ Route::middleware('auth:web')->group(function(){
     Route::get('/budgets/comparison/{id}', [BudgetController::class, 'getBudgetItemComparison'])->name('budgets.comparison');
     Route::get('/budgets/active', [BudgetController::class, 'getActiveBudgets'])->name('budgets.active');
     Route::get('/budgets/last-month', [BudgetController::class, 'getLastMonthTotalBudget'])->name('budgets.lastMonth');
+
+    // Wishlist Categories Routes
+    Route::get('/wishlist-categories/{type}', [WishlistCategoryController::class, 'list'])->whereNumber('type');
+
+    // Wishlist Groups Routes
+    Route::get('/wishlist-groups', [WishlistGroupController::class, 'index']);
+    Route::post('/wishlist-groups', [WishlistGroupController::class, 'store']);
 });
 

@@ -87,6 +87,7 @@ export const Helpers = {
                 }
                 return response.data
             } catch (error) {
+                console.log(`Fetch Item Error: ${error}`);
                 this.$swal('Error!', 'Failed to fetch item.', 'error');
                 return [] // or null, depending on your fallback
             }
@@ -310,7 +311,7 @@ export const Helpers = {
                 data: form,
                 method,
                 successMessage: `${title} ${action} successfully!`,
-                errorMessage: `Failed to ${verb} ${title}.`,
+                errorMessage: parameters.errorMessage,
                 callback: (responseData) => {
                     // Safely reset native DOM form if available
                     if (e?.target && typeof e.target.reset === 'function') {
